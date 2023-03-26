@@ -20,7 +20,7 @@ def aesctr256(sk: bytes, counter: bytes, bytes_: int):
         out = encryptor.update(buffer[:bytes_])
 
     # TODO ADD FINAL
-    print("AES returned: " + out.hex())
+    # print("AES returned: " + out.hex())
     return out
 
 

@@ -5,8 +5,11 @@ import hashlib
 
 
 class Hash:
-    def __init__(self):
-        self.h = [None for _ in range(HASH_SIZE)]  # uint8_t h[HASH_SIZE];
+    def __init__(self, h=None):
+        if h:
+            self.h = h
+        else:
+            self.h = [None for _ in range(HASH_SIZE)]  # uint8_t h[HASH_SIZE];
 
 
 class Address:
