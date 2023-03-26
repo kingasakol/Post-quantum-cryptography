@@ -1,6 +1,6 @@
 from common import HASH_SIZE
 from finished.haraka import haraka256_256, haraka512_256, haraka256_256_chain
-from finished.python_utils import int_list_to_bytes, bytes_to_int_list
+from utils.bytes_utils import int_list_to_bytes
 import hashlib
 
 
@@ -26,7 +26,7 @@ def hashcmpN(a, b, N):
     return True
 
 
-def hashcpy(a, b):
+def hashcpy(a: Hash, b: Hash):
     a.h = b.h.copy()
 
 
@@ -39,7 +39,7 @@ def hashzero(a):
     a.h = [0 for _ in range(16)]
 
 
-def hashswap(a, b):
+def hashswap(a: Hash, b: Hash):
     tmp = a.h
     a.h = b.h
     b.h = tmp
@@ -50,7 +50,7 @@ def hash_N_to_N(src):
     return haraka256_256(src.h)
 
 
-def hash_N_to_N_chain(src, chinelen):
+def hash_N_to_N_chain(src: Hash, chinelen: int):
     return haraka256_256_chain(src.h, chinelen)
 
 
@@ -67,9 +67,11 @@ def hash_to_N(src):
 
 
 # TODO verify
-def hash_compress_pairs(src):
+def hash_compress_pairs(dst: [Hash], src: [Hash], count: int):
     print("hash_compress_pairs WARNING: verify if ok")
-    return [hash_2N_to_N(s) for s in src]
+    print("hash_compress_pairs LOG: ", len(dst), count)
+    for i in range(count):
+        dst[i] = hash_2N_to_N(src[i])
 
 
 def hash_compress_all(src):
