@@ -184,9 +184,27 @@ def haraka256_256(msg):
     # truncation
     return list(itertools.chain(*s))
 
+
+def haraka256_256_chain(msg, chainlen):
+
+    s = [msg[i:i + 16] for i in [0, 16]]
+    t_ = [msg[i:i + 16] for i in [0, 16]]
+    rcon = [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+    for c in range(chainlen):
+        for t in range(ROUNDS):
+            for m in range(AES_ROUNDS):
+                s = [aesenc(s[i], convRC(RC[2 * t * AES_ROUNDS + 2 * m + i])) for i in range(2)]
+                rcon = shift32(rcon)
+
+            s = mix256(s)
+        for i in range(16):
+            s[0][i] = t_[0][i] = s[0][i] ^ t_[0][i]
+            s[1][i] = t_[1][i] = s[1][i] ^ t_[1][i]
+
+    return s[0] + s[1]
+
 '''
 Na wejściu dostaje listę bajtów jako inty np [0xAA, 0xBB...]
-Na wyjściu daje wynik w takim samym formacie
 '''
 if __name__ == "__main__":
     def ps(s):
@@ -197,8 +215,10 @@ if __name__ == "__main__":
   
     print(ps(haraka256_256([i for i in range(64)])))
     print(ps(haraka512_256([i for i in range(64)])))
+    print(ps(haraka256_256_chain([i for i in range(64)], 5)))
 
     '''
     dd 90 04 5b 92 99 32 74 ff f8 cc f4 69 03 d1 c8 18 4b 40 4c c8 37 35 55 1c 80 a7 2b 5f b3 20 45
     0e 27 51 4e 8a b7 b4 ee 15 3c 9a 54 13 fb 1e 98 4a 91 4f 5b 6f ea 17 22 85 41 ce 17 07 fc 4e 64
+    ae 13 7b 6f 07 3c a8 60 2d 6c a2 06 6a 64 b4 5f 8f e9 76 be a2 ee b5 ce 1c 2e eb aa f7 00 46 36
     '''
