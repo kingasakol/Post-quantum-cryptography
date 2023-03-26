@@ -48,7 +48,7 @@ RC = [0x0684704ce620c00ab2c5fef075817b9d, 0x8b66b4e188f3a06b640f6ba42f08f717,
       0x2ff372380de7d31e367e4778848f2ad2, 0x08d95c6acf74be8bee36b135b73bd58f,
       0x5880f434c9d6ee9866ae1838a3743e4a, 0x593023f0aefabd99d0fdf4c79a9369bd,
       0x329ae3d1eb606e6fa5cc637b6f1ecb2a, 0xe00207eb49e01594a4dc93d6cb7594ab,
-      0x1caa0c4ff751c880942366a665208ef8, 0x02f7f57fdb2dc1ddbd03239fe3e67e4]
+      0x1caa0c4ff751c880942366a665208ef8, 0x02f7f57fdb2dc1ddbd03239fe3e67e4a]
 
 
 # get padded hex for single byte
@@ -207,15 +207,16 @@ def haraka256_256_chain(msg, chainlen):
 Na wejściu dostaje listę bajtów jako inty np [0xAA, 0xBB...]
 '''
 if __name__ == "__main__":
+    #print(ps(haraka512_256([1 for i in range(32)] + [2 for i in range(32)])))
     def ps(s):
         return " ".join([hexbyte(x) for x in s])
 
     def hexbyte(x):
         return hex(x)[2:].zfill(2)
   
-    print(ps(haraka256_256([i for i in range(64)])))
-    print(ps(haraka512_256([i for i in range(64)])))
-    print(ps(haraka256_256_chain([i for i in range(64)], 5)))
+    #print(ps(haraka256_256([i for i in range(64)])))
+    #print(ps(haraka512_256([i for i in range(64)]))) may be wrong!
+    #print(ps(haraka256_256_chain([i for i in range(64)], 5)))
 
     '''
     dd 90 04 5b 92 99 32 74 ff f8 cc f4 69 03 d1 c8 18 4b 40 4c c8 37 35 55 1c 80 a7 2b 5f b3 20 45

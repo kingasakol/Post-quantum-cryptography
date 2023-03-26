@@ -33,9 +33,10 @@ def hashcpy(a: Hash, b: Hash):
     a.h = b.h.copy()
 
 
-def hashcpyN(a, b, N):
+def hashcpyN(a: [Hash], b: [Hash], N: int):
+    print("WARINING different than src")
     for i in range(N):
-        a.h[i] = b.h[i]
+        a[i] = b[i]
 
 
 def hashzero(a):
@@ -53,12 +54,13 @@ def hash_N_to_N(src):
     return haraka256_256(src.h)
 
 
-def hash_N_to_N_chain(src: Hash, chinelen: int):
-    return haraka256_256_chain(src.h, chinelen)
+def hash_N_to_N_chain(src: Hash, chinelen: int) -> Hash:
+    return Hash(haraka256_256_chain(src.h, chinelen))
 
 
-def hash_2N_to_N(src):
-    return haraka512_256(src.h)
+# takes two Hashes and makes haraka on them
+def hash_2N_to_N(src1: Hash, src2: Hash) -> Hash:
+    return Hash(haraka512_256(src1.h + src2.h))
 
 
 # WARNING: accepts bytes!
@@ -87,7 +89,7 @@ def hash_parallel(src):
     return [hash_N_to_N(s) for s in src]
 
 
-def hash_parallel_chains(src, chinelen):
+def hash_parallel_chains(src: [Hash], chinelen: int) -> [Hash]:
     print("hash_parallel_chains WARNING: verify if ok")
     return [hash_N_to_N_chain(s, chinelen) for s in src]
 
@@ -97,3 +99,9 @@ if __name__ == "__main__":
     '''
     b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44
     '''
+    h1 = Hash()
+    h2 = Hash()
+    for i in range(HASH_SIZE):
+        h1.h[i] = 60
+        h2.h[i] = 9
+    print(int_list_to_bytes(hash_2N_to_N(h1, h2).h).hex()) # 501b7e0d91defc20b7813d46a31838785af8a5aa21d86e57b92799d3bf178757
