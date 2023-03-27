@@ -49,6 +49,7 @@ def wots_gensk(key: Hash, address: Address, sk: WotsSK):
             sk.k[i].h[j] = out[i * HASH_SIZE + j]
 
 
+# TESTED
 def wots_sign(sk: WotsSK, sign: WotsSign, msg: Hash):
     checksum = 0
 
@@ -81,6 +82,7 @@ def lwots_genpk(sk: WotsSK, pk: LwotsPK):
     lwots_ltree(tmp, pk)
 
 
+# TESTED
 def lwots_extract(pk: LwotsPK, sign: WotsSign, msg: Hash):
     tmp = WotsPK()
 

@@ -71,12 +71,10 @@ def hash_to_N(src):
     return h.digest()
 
 
-# TODO verify
+# WORKS
 def hash_compress_pairs(dst: [Hash], src: [Hash], count: int):
-    print("hash_compress_pairs WARNING: verify if ok")
-    print("hash_compress_pairs LOG: ", len(dst), count)
     for i in range(count):
-        dst[i] = hash_2N_to_N(src[i])
+        dst[i] = hash_2N_to_N(src[i*2], src[i*2+1])
 
 
 def hash_compress_all(src):
@@ -103,4 +101,5 @@ if __name__ == "__main__":
     for i in range(HASH_SIZE):
         h1.h[i] = 60
         h2.h[i] = 9
-    print(int_list_to_bytes(hash_2N_to_N(h1, h2).h).hex()) # 501b7e0d91defc20b7813d46a31838785af8a5aa21d86e57b92799d3bf178757
+    print(int_list_to_bytes(
+        hash_2N_to_N(h1, h2).h).hex())  # 501b7e0d91defc20b7813d46a31838785af8a5aa21d86e57b92799d3bf178757
