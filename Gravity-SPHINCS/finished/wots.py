@@ -7,22 +7,22 @@ from utils.bytes_utils import int_list_to_bytes
 
 
 # TODO some redundancy here
-class Wots_SK:
+class WotsSK:
     def __init__(self):
         self.k = [Hash() for _ in range(WOTS_ell)]
 
 
-class Wots_PK:
+class WotsPK:
     def __init__(self):
         self.k = [Hash() for _ in range(WOTS_ell)]
 
 
-class Lwots_PK:
+class LwotsPK:
     def __init__(self):
         self.k = Hash()
 
 
-class Wots_sign:
+class WotsSign:
     def __init__(self):
         self.s = [Hash() for _ in range(WOTS_ell)]
 
@@ -33,7 +33,7 @@ def wots_chain(src: Hash, count: int) -> Hash:
 
 
 #  TESTED
-def wots_gensk(key: Hash, address: Address, sk: Wots_SK):
+def wots_gensk(key: Hash, address: Address, sk: WotsSK):
     iv = [None for _ in range(16)]
     for i in range(8):
         iv[i] = (address.index >> (56 - 8 * i)) & 0xFF
@@ -49,7 +49,7 @@ def wots_gensk(key: Hash, address: Address, sk: Wots_SK):
             sk.k[i].h[j] = out[i * HASH_SIZE + j]
 
 
-def wots_sign(sk: Wots_SK, sign: Wots_sign, msg: Hash):
+def wots_sign(sk: WotsSK, sign: WotsSign, msg: Hash):
     checksum = 0
 
     for i in range(0, WOTS_ell1, 2):
@@ -69,20 +69,20 @@ def wots_sign(sk: Wots_SK, sign: Wots_sign, msg: Hash):
 
 # WOTS with L-tree and without masks */
 # TESTED
-def lwots_ltree(pk: Wots_PK, root: Lwots_PK):
+def lwots_ltree(pk: WotsPK, root: LwotsPK):
     root.k = ltree(pk.k[:2 * WOTS_ell])
 
 
 # TESTED
-def lwots_genpk(sk: Wots_SK, pk: Lwots_PK):
-    tmp = Wots_PK()
+def lwots_genpk(sk: WotsSK, pk: LwotsPK):
+    tmp = WotsPK()
 
     tmp.k = hash_parallel_chains(sk.k, WOTS_w - 1)
     lwots_ltree(tmp, pk)
 
 
-def lwots_extract(pk: Lwots_PK, sign: Wots_sign, msg: Hash):
-    tmp = Wots_PK()
+def lwots_extract(pk: LwotsPK, sign: WotsSign, msg: Hash):
+    tmp = WotsPK()
 
     checksum = 0
     for i in range(0, WOTS_ell1, 2):
@@ -107,7 +107,7 @@ def sample_wots_gensk():
     for i in range(32):
         h.h[i] = i
     a = Address(1, 2)
-    w = Wots_SK()
+    w = WotsSK()
     wots_gensk(h, a, w)
     return w
 
@@ -123,7 +123,7 @@ def wots_gensk_test():
 
 def sample_wots_sign():
     w = sample_wots_gensk()
-    s = Wots_sign()
+    s = WotsSign()
     h = Hash()
     for i in range(32):
         h.h[i] = 1 + i
@@ -140,7 +140,7 @@ def wots_sign_test():
 
 def sample_lwots_genpk():
     w = sample_wots_gensk()
-    p = Lwots_PK()
+    p = LwotsPK()
     lwots_genpk(w, p)
     return p
 
@@ -155,7 +155,7 @@ def lwots_genpk_test():
 def lwots_extract_test():
     h = Hash([8 + i for i in range(32)])
     s = sample_wots_sign()
-    p = Lwots_PK()
+    p = LwotsPK()
     lwots_extract(p, s, h)
     expected = "30774304e6020b3592764cf73f30d72daecb9ea544ba1e06a71167699c9d7e22"
     if hash_to_bytes(p.k).hex() != expected:
