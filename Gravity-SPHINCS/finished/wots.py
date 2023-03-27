@@ -1,7 +1,7 @@
-from finished.hash import hash_N_to_N_chain, Hash, Address, hashcpyN, hash_parallel_chains
-from common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
+from finished.hash import hash_N_to_N_chain, Hash, Address, hash_parallel_chains
+from shaky.common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
 from finished.aes import aesctr256
-from shaky.ltree import ltree
+from finished.ltree import ltree
 from utils.hash_utlis import hash_to_bytes, list_of_hashes_to_bytes
 from utils.bytes_utils import int_list_to_bytes
 
@@ -67,6 +67,40 @@ def wots_sign(sk: Wots_SK, sign: Wots_sign, msg: Hash):
         checksum >>= 4
 
 
+# WOTS with L-tree and without masks */
+# TESTED
+def lwots_ltree(pk: Wots_PK, root: Lwots_PK):
+    root.k = ltree(pk.k[:2 * WOTS_ell])
+
+
+# TESTED
+def lwots_genpk(sk: Wots_SK, pk: Lwots_PK):
+    tmp = Wots_PK()
+
+    tmp.k = hash_parallel_chains(sk.k, WOTS_w - 1)
+    lwots_ltree(tmp, pk)
+
+
+def lwots_extract(pk: Lwots_PK, sign: Wots_sign, msg: Hash):
+    tmp = Wots_PK()
+
+    checksum = 0
+    for i in range(0, WOTS_ell1, 2):
+        v = msg.h[i // 2]
+        a = (v >> 4) & 15
+        b = v & 15
+        checksum += (WOTS_w - 1 - a) + (WOTS_w - 1 - b)
+        tmp.k[i] = wots_chain(sign.s[i], WOTS_w - 1 - a)
+        tmp.k[i + 1] = wots_chain(sign.s[i + 1], WOTS_w - 1 - b)
+
+    # Checksum values
+    for i in range(WOTS_ell1, WOTS_ell):
+        tmp.k[i] = wots_chain(sign.s[i], WOTS_w - 1 - (checksum & 15))
+        checksum >>= 4
+
+    lwots_ltree(tmp, pk)
+
+
 # TEST UTIL
 def sample_wots_gensk():
     h = Hash()
@@ -78,20 +112,6 @@ def sample_wots_gensk():
     return w
 
 
-# WOTS with L-tree and without masks */
-# UNTESTED
-def lwots_ltree(pk: Wots_PK, root: Lwots_PK):
-    root.k = ltree(pk.k[:2*WOTS_ell])
-
-
-# UNTESTED
-def lwots_genpk(sk: Wots_SK, pk: Lwots_PK):
-    tmp = Wots_PK()
-
-    tmp.k = hash_parallel_chains(sk.k, WOTS_w - 1)
-    lwots_ltree(tmp, pk)
-
-
 # TEST UTILS
 def wots_gensk_test():
     w = sample_wots_gensk()
@@ -101,29 +121,49 @@ def wots_gensk_test():
     return w
 
 
-def wots_sign_test():
+def sample_wots_sign():
     w = sample_wots_gensk()
     s = Wots_sign()
     h = Hash()
     for i in range(32):
         h.h[i] = 1 + i
     wots_sign(w, s, h)
+    return s
+
+
+def wots_sign_test():
+    s = sample_wots_sign()
     expected = "148161be7b61a6c76fef7eaebd34142848cdb7f940d68f99df3b95bd67190699a3916427e37f9f5488a46c8050b13623a707b0db05f5e559655713473df67b9228c151c09925de6ca302b410a10566594f10cd6c139e6d8ff25b53ad5f83b7dbb7df17f66518e95c7306cf8b811d672b6aa619b67c18265e11d40044d9a266d27ca4e977fc1c754991de6081120aeee425c7fadd9bee8974fb4aa4e9c893a636c4452607f140c31cd6a7441c6c7fbc2e03efaf1351ac19c1dc06782b315c7056ea1fb85a31434e9b2cdfae92b108409627383ba5729e707c57d74ffacb6108beb2aa29409bed4ab35b742875f7f89769bb131cd59776934c9f3c3344b20ad1e47bf83fe2f858e118a9c9b7f7b95c6501e75b7392ea36c8f2dd92eb1bd7e9281717fe5a118c34830fb252fa841a6c175ba0fe8a745f17c8a7d5098f2ad2ddb6d163d892fbc5739cfe54117504f2a6f3bd019e7431fce2ed67d64f28958891c8221364237e699374f6f04ee3e8006fa2150a71b914c6f635a75bd85a9deb13e5e0842a3b8a4611e799d5acca38f6d76658ea730a9be67075229cc4c415205d1095cbe7f8a1e82ca166175eac0453fe9c86f3c42b61b915356be26cd0c9b266365a6a201a7f3530da320f2544c14c5818d021b946918f3c331037508ad16c4d5e52cae5eae12a535fadf2b14d58a6737b45f1e45d69a9d3429df739da8a0c685dcaa435fbdc3c0ded6a5de0c67ddc397345a3881605beb21a35011801f624ffcf412fc7643e4af29567537a1a34c5fda4d3b925e98daa0c062c516d75209453c4c77becc076db416931158b88508d8dee46c9e828cf70ec5bd31c5d83f0189f7c9c4176a915277301f31324d9644504b822e5940da492beecafed0992c19b5c31ebcf4df5b7c22fc605f561bd45c168aacddacac2714754064e4c9acc47500eb07f9856bbc2ffc7c176ea44b135a78c750e9ddce26c10826d1d5e9572f0cf87e7be97d256903f434fe98f4e012b7544d9318ed3fa5b2bdd42e16737ed53cc4d4239353d8569cfe3a27efcdcdbe4c13c071a30ed0e020f36095010e8d20e366afefaba0da97c6ecb4de0910c0c5925eec5d50df582e8dca52f7aadeabe7d16abab19ffa497ac38cbaac4235032ac8ffa7530d2340a264209fb8dc6d321e87b2ce771c9d9f21edf396b4c9022dd2fc0cca177c7b055143a53dd172625d3c1e2c3993cb9674f4751e7b150d1d80b1b8a9504a82e4d2c69756ee15aa925ed58fb0ef7cbfe91a4c8e9197a6010e5c6e39a1b23ebf94ab077a08f40ff46bc3aa39cea851a7610a4cdcca64e038faad5296b671645229846aa55733de8885ba4a554ad62f7b6dda91b85badfa771abdc943b6ba952025a5a7e9034cd0df1f8df33df89b3a750319aa50ab18a67f588f5befbd941dc4568191d28007ba0600596a13639565b67aacfdc6e590aece4042e9cbb431408d5743fce08f0a13b01fcadfae0af939bc150ceb9227837ff2f8911fc3559261ae59f31bb170f990761bcfb8597e1bcc4f20df72000341fa3d4e440803b8dd3154e4ebf891b746f4a1a9188906c93018e819d2a61c3936e470932aeac933553cea77425b2c2f637b4ff1c58268309e3989265fa0d5c4bf37932ce34ad06aa4dc445ca1d96ca15fe963d7791883891aef84f46461af162c4fd5ddb1c72b4fd0afb8d015bfcae0ed46fe3c32871023855230e90bad445e22548b974f987806d806b4c6def7aef3a1f42b15ee4205f39c11b420b1dcef26a5695e058d6cea1eb5a2b8f72f48b68f7e4d9611f3ba552c3dcfe2149f82b9cb6f4bb70c6a3ee0fe2cf3cae969a8f0b94f1492f4be2247ad60d07beb2fb158efd981ab025067bcf7f3d1f5cb986cab694532bf6d2c66a5a2a2ca8c468b2eda5d8a8d840c7d63bcc56a156260ee5a9699e9daf45d239a28aeddb898a0b5a36f37e4ea376d0059199da2cd2b3335bfb58625895441ddfa9f7c4ae992123072a4998d98b15e81817f6648e3d1f05f17a524f35a1b78d83b294f8d524101955b844833ca575e69b7461f27ba6549c068b12d37f8965c7f21991c8231fe4b64762f21b92f07a6959b29f1f0866a8ec798fefae73e50d9d6ec4d957bb088ef169fff8ed5786b9fa87f0f0a049aa1c23035e1f2333923ea47d98afc78d5f46a6482b0acbeb7337e96f88b732b4b51412ce4c0607ffd63cf07b3383ffafc6c3280848a51205d4439577bfcbe6671384373ce2d4c346bc7e9af55767528a8e95d1f2f5be7d44a56143f6256ba367b286d8829eee2abbbbb2423885d0ff27ff39bfa08016e4273a5b7ebf93a15281b8d40a498946835e39812427f3b35de2184e0493eaab0a244f7809c228edd80549f6286d569298d2c9213e5deaf8589f9f4ecdda6cd9d6eb02cd0db8faf03fab70e3a7144a279ac666b8b42dec2924cee91dd0c87b8d49ebd07cc6abd04b638bcb24c3528481ae1d118d4c2ac1710b9c89b7c8aef8f2d27602af8558a36a01fd7b520b7e3400ac609b77c9b5e4ee90e0cf31f1cbf27c4e8082d2ebc9c653f7aeb50cd51d52a8846e2b7c46e636de6eb72c9f513a64610e0100a18fd7b2f4ef74ceb29529fb596cb8adefd6cc38339bb2543de6506428a13fb4a0d6e2509f5e4ad327a5bb4fff54b0e3f9d0ed45a109929dc2cf3bfa3233cf2c8f2a8ac6caa2a5c8fab48d6fa4dd74c0eb6956986862cfb53610152869689b37ff0c7037b021536518c19ea9839af15c6fb516277f1419d6b615826b00056d833ee9bd9f6f6a9db7a2c2a9c661322e62f77e87a5b210341660d2baf09a91dfc6a8d7dce22d330b44e9e893b9b3c1fd07473e19c38300cd00523be0d50d61b7a8fb4f56b667f8abb11a316f4977f5fc9b07d4d9a3cb1cfeab6671581b8961d2e4f3152c2e93c8cc01c773066d96ec3d6fb4d47ffa43274ab23fd5b00ae60783bd14e5240ae8bff1afc67afbf4bd18fcfe294f09cd6f03fb57270edb512cf9cdab36f06e602d9fb61cf0ab8e99e001496b0cd1f22f041fa7bd"
     if list_of_hashes_to_bytes(s.s).hex() != expected:
         raise Exception("Test failed")
-    return w
 
 
-def lwots_genpk_test():
+def sample_lwots_genpk():
     w = sample_wots_gensk()
     p = Lwots_PK()
     lwots_genpk(w, p)
+    return p
+
+
+def lwots_genpk_test():
+    p = sample_lwots_genpk()
     expected = "3f44b236e974988ff0959beeb4b10d1dcf63112a1814bf222c7f3bdb095b08b7"
     if hash_to_bytes(p.k).hex() != expected:
         raise Exception("Test failed")
 
 
+def lwots_extract_test():
+    h = Hash([8 + i for i in range(32)])
+    s = sample_wots_sign()
+    p = Lwots_PK()
+    lwots_extract(p, s, h)
+    expected = "30774304e6020b3592764cf73f30d72daecb9ea544ba1e06a71167699c9d7e22"
+    if hash_to_bytes(p.k).hex() != expected:
+        raise Exception("Test failed")
+
+
 if __name__ == "__main__":
+    lwots_extract_test()
     lwots_genpk_test()
     wots_sign_test()
     wots_gensk_test()

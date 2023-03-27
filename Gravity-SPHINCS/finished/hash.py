@@ -1,4 +1,4 @@
-from common import HASH_SIZE
+from shaky.common import HASH_SIZE
 from finished.haraka import haraka256_256, haraka512_256, haraka256_256_chain
 from utils.bytes_utils import int_list_to_bytes
 import hashlib
@@ -90,7 +90,6 @@ def hash_parallel(src):
 
 
 def hash_parallel_chains(src: [Hash], chinelen: int) -> [Hash]:
-    print("hash_parallel_chains WARNING: verify if ok")
     return [hash_N_to_N_chain(s, chinelen) for s in src]
 
 

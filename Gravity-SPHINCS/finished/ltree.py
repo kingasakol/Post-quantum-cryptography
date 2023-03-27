@@ -1,4 +1,3 @@
-from common import WOTS_ell
 from finished.hash import *
 from utils.hash_utlis import hash_to_bytes
 
