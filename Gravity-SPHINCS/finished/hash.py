@@ -82,9 +82,10 @@ def hash_compress_all(src):
     return [hash_to_N(s) for s in src]
 
 
-def hash_parallel(src):
-    print("hash_parallel WARNING: verify if ok")
-    return [hash_N_to_N(s) for s in src]
+# this implementation allows to hash only selected num from dst and have bigger buf than result
+def hash_parallel(dst: [Hash], src: [Hash], count: int):
+    for i in range(count):
+        dst[i] = hash_N_to_N(src[i])
 
 
 def hash_parallel_chains(src: [Hash], chinelen: int) -> [Hash]:

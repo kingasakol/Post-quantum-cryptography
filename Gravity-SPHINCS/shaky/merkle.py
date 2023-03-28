@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from finished.hash import Hash, Address, hashcpy, hash_2N_to_N
 from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
-from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau
+from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau, GRAVITY_ERR_VERIF
 from utils.hash_utlis import hash_to_bytes
 
 
@@ -23,6 +23,10 @@ def hash_compress_pairs_one_list(src: [Hash], id_1: int, id_2: int, n: int):
         src[id_1 + i] = hash_2N_to_N(src[id_2 + 2 * i], src[id_2 + 2 * i + 1])
 
 
+def merkle_alloc_buf(n: int) -> [None]:
+    return [None for _ in range(2 * (1 << n))]
+
+
 # todo don't think that return is needed
 # TESTED
 def merkle_genpk(key: Hash, address: Address, pk: MerklePK) -> int:
@@ -30,7 +34,7 @@ def merkle_genpk(key: Hash, address: Address, pk: MerklePK) -> int:
     base_address = Address(address.index - index, address.layer)
     wsk = WotsSK()
     wpk = LwotsPK()
-    buf = [None for _ in range(2 * (1 << MERKLE_h) * HASH_SIZE)]
+    buf = merkle_alloc_buf(MERKLE_h)
 
     # leaves
     for j in range(MERKLE_hhh):
@@ -50,7 +54,7 @@ def merkle_sign(key: Hash, address: Address, sign: MerkleSign, msg: Hash, pk: Me
     wpk = LwotsPK()
     index = address.index & (MERKLE_hhh - 1)
     base_address = Address(address.index - index, address.layer)
-    buf = [None for _ in range(2 * (1 << MERKLE_h) * HASH_SIZE)]
+    buf = merkle_alloc_buf(MERKLE_h)
 
     for j in range(MERKLE_hhh):
         wots_gensk(key, base_address, wsk)
@@ -144,6 +148,8 @@ def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, in
                 octopus[length].h = buf[dst_id + sibling].h.copy()
                 length += 1
             indices[j] = indices[i] >> 1
+            i += 1
+            j += 1
         # Update count of non-redundant nodes
         count = j
         dst_id, src_id = src_id, dst_id
@@ -153,6 +159,44 @@ def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, in
 
     root.h = buf[dst_id].h.copy()
     return length
+
+
+# TODO UNTESTED
+# TODO RETURNS INT
+def merkle_compress_octopus(nodes: [Hash], height: int, octopus: [Hash], octolen: int, indices: [int],
+                            count: int) -> int:
+    length = 0
+    buf = [None, None]
+    for l in range(height):
+        i = 0
+        j = 0
+        while i < count:
+            index = indices[i]
+            if index % 2 == 0:
+                buf[0] = Hash(nodes[i].h.copy())
+                if (i + 1) < count and indices[i + 1] == index + 1:
+                    i += 1
+                    buf[1] = Hash([nodes[i].h.copy()])
+                else:
+                    if len == octolen:
+                        return GRAVITY_ERR_VERIF
+                    buf[1] = Hash(octopus[length].h.copy())
+                    length += 1
+            else:
+                if len == octolen:
+                    return GRAVITY_ERR_VERIF
+                buf[0] = Hash([octopus[length].h.copy()])
+                length += 1
+                buf[1] = Hash([nodes[i].h.copy()])
+            i += 1
+            j += 1
+            nodes[j] = hash_2N_to_N(buf[0], buf[1])
+            indices[j] = indices[i] >> 1
+        count = j
+
+    if len != octolen:
+        return GRAVITY_ERR_VERIF
+    return GRAVITY_OK
 
 
 # ------------------------------------- TEST UTILS:
@@ -211,7 +255,7 @@ def merkle_extract_test():
 
 def merkle_gen_octopus_test():
     # def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, indices: [int], count: int) -> int:
-    buf = [None for _ in range(2 * HASH_SIZE * (1 << 16))]
+    buf = merkle_alloc_buf(16)
     height = PORS_tau
     octopus = [i % 10 for i in range(PORS_k * PORS_tau)]
     root = [15 for _ in range(HASH_SIZE)]
