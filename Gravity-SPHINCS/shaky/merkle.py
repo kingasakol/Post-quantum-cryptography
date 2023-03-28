@@ -2,7 +2,7 @@ from functools import lru_cache
 
 from finished.hash import Hash, Address, hashcpy, hash_2N_to_N
 from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
-from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell
+from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau
 from utils.hash_utlis import hash_to_bytes
 
 
@@ -65,6 +65,7 @@ def merkle_sign(key: Hash, address: Address, sign: MerkleSign, msg: Hash, pk: Me
     return GRAVITY_OK
 
 
+# TESTED
 def merkle_extract(pk: MerklePK, address: Address, sign: MerkleSign, msg: Hash):
     wpk = LwotsPK()
     index = address.index & (MERKLE_hhh - 1)
@@ -108,6 +109,7 @@ def merkle_gen_auth(buf: [Hash], height: int, auth: [Hash], index: int, root: Ha
         root.h = buf[0].h.copy()
 
 
+# TESTED BY TRANSITION
 def merkle_compress_auth(node: Hash, index: int, auth: [Hash], height_diff: int) -> int:
     for l in range(height_diff):
         if index % 2 == 0:
@@ -118,6 +120,42 @@ def merkle_compress_auth(node: Hash, index: int, auth: [Hash], height_diff: int)
 
     return index
 
+
+# todo operates on buf in c-like pointer style,
+# returns octolen as int is primitive
+# TODO UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED
+def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, indices: [int], count: int) -> int:
+    n = 1 << height
+    src_id = n
+    dst_id = 0
+    length = 0
+
+    for l in range(height):
+        i = 0
+        j = 0
+        # Copy auth octopus
+        while i < count:
+            index = indices[i]
+            sibling = index ^ 1
+            # Check redundancy with sibling
+            if (i + 1) < count and indices[i + 1] == sibling:
+                i += 1
+            else:
+                octopus[length].h = buf[dst_id + sibling].h.copy()
+                length += 1
+            indices[j] = indices[i] >> 1
+        # Update count of non-redundant nodes
+        count = j
+        dst_id, src_id = src_id, dst_id
+        n >>= 1
+        # compute all hashes at current layer
+        hash_compress_pairs_one_list(buf, dst_id, src_id, n)
+
+    root.h = buf[dst_id].h.copy()
+    return length
+
+
+# ------------------------------------- TEST UTILS:
 
 def merkle_genpk_sample():
     k = Hash([i for i in range(32)])
@@ -169,6 +207,15 @@ def merkle_extract_test():
     expected = "e754635abcd170df8bbe469c29ecf2b265096e5fe13b89f0a412aedd85fa6e13"
     if hash_to_bytes(pk.k).hex() != expected:
         raise Exception("Test failed")
+
+
+def merkle_gen_octopus_test():
+    # def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, indices: [int], count: int) -> int:
+    buf = [None for _ in range(2 * HASH_SIZE * (1 << 16))]
+    height = PORS_tau
+    octopus = [i % 10 for i in range(PORS_k * PORS_tau)]
+    root = [15 for _ in range(HASH_SIZE)]
+    # todo
 
 
 if __name__ == "__main__":

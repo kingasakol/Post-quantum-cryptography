@@ -1,25 +1,22 @@
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def aesctr256(sk: bytes, counter: bytes, bytes_: int):
-    if bytes_ >= 4096:
-        print("AES warning: are those bytes_ ok? ", bytes_)
+def aesctr256(sk: bytes, counter: bytes, bytes_: int) -> bytes:
     size_of_buffer = 4096  # TODO static ?
     buffer = bytes.fromhex("00" * size_of_buffer)
     if bytes_ == 0:
         raise Exception("AES unimplemented: bytes_ was 0")
-
+    out = b''
     cipher = Cipher(algorithms.AES256(sk), modes.CTR(counter))
     encryptor = cipher.encryptor()
-    while bytes_ > size_of_buffer:  # TODO this mat work strange and can cause bugs
-        out = encryptor.update(buffer[:bytes_])
-        out += size_of_buffer
+    while bytes_ > size_of_buffer:
+        out += encryptor.update(buffer[:min(bytes_, 4096)])
         bytes_ -= size_of_buffer
 
     if bytes_ > 0:
-        out = encryptor.update(buffer[:bytes_])
+        out += encryptor.update(buffer[:bytes_])
 
-    # TODO ADD FINAL
+    # TODO ADD FINAL ?
     # print("AES returned: " + out.hex())
     return out
 
