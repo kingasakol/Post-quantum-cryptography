@@ -1,9 +1,12 @@
-from finished.hash import Hash, Address, hash_parallel
-from shaky.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK
-from shaky.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus
+from finished.aes import aesctr256_zeroiv
+from finished.hash import Hash, Address, hash_parallel, hash_2N_to_N
+from shaky.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_ERR_VERIF, GRAVITY_mask
+from shaky.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
 from utils.hash_utlis import list_of_hashes_to_bytes, hash_to_bytes
 from utils.key_utils import gensk
 
+BYTES_PER_INDEX  = 4
+STREAMLEN = 8 * PORS_k + HASH_SIZE
 
 class PorsSubset:
     def __init__(self):
@@ -30,9 +33,20 @@ class PorsSign:
     def __init__(self):
         self.s = [None for _ in range(PORS_k)]
 
+# TODO untested
+    def __eq__(self, other):
+        if isinstance(other, PorsSign):
+            for i in range(PORS_k):
+                if self.s[i] != other.s[i]:
+                    return False
+            return True
+        return False
+
+
 class PorstPK:
     def __init__(self):
         self.k = None
+
 
 class PorstKeypair:
     def __init__(self):
@@ -45,6 +59,17 @@ class OctoporstSign:
     s = PorsSign()
     octopus = [Hash() for _ in range(PORS_k * PORS_tau)]
     octolen = None
+
+# TODO untested
+    def __eq__(self, other):
+        if isinstance(other, OctoporstSign):
+            if self.octolen != other.octolen:
+                return False
+            for i in range(self.octolen):
+                if self.octopus[i] != other.octopus[i]:
+                    return False
+            return self.s == other.s
+        return False
 
 
 # TESTED
@@ -81,9 +106,71 @@ def octoporst_sign(sk: PorsSK, sign: OctoporstSign, pk: PorstPK, subset: PorsSub
     pors_sign(sk, sign.s, subset)
     buf = merkle_alloc_buf(PORS_tau)
     hash_parallel(buf, sk.k, PORS_t)
-    merkle_gen_octopus(buf, PORS_tau, sign.octopus, sign.octolen, pk.k,subset.s, PORS_k)
+    merkle_gen_octopus(buf, PORS_tau, sign.octopus, sign.octolen, pk.k, subset.s, PORS_k)
     return GRAVITY_OK
 
+
+# TODO UNTESTED
+# TODO returns int
+def octoporst_extract(pk: PorstPK, sign: OctoporstSign, subset: PorsSubset) -> int:
+    tmp = [Hash() for _ in range(PORS_k)]
+    sort_subset(subset)
+    hash_parallel(tmp, sign.s.s, PORS_k)
+    res = merkle_compress_octopus(tmp, PORS_tau, sign.octopus, sign.octolen, subset.s, PORS_k)
+    if res != GRAVITY_OK:
+        return res
+    pk.k = tmp[0].h.copy()
+    return GRAVITY_OK
+
+
+# TODO UNTESTED
+# TODO returns int
+def octoporst_loadsign(sing: OctoporstSign, _sign: [int], _len: int) -> int:
+    if _len < PORS_k * PORS_tau * HASH_SIZE:
+        return GRAVITY_ERR_VERIF
+
+    _len -= PORS_k * HASH_SIZE
+
+    if _len % HASH_SIZE != 0:
+        return GRAVITY_ERR_VERIF
+
+    _len /= HASH_SIZE
+
+    if _len > PORS_k * PORS_tau:
+        return GRAVITY_ERR_VERIF
+
+    for i in range(PORS_k):
+        sing.s.s[i] = _sign[i * HASH_SIZE: (i + 1) * HASH_SIZE].copy()
+    for i in range(_len):
+        sing.s.s[i] = _sign[(PORS_k + i) * HASH_SIZE: (PORS_k + i + 1) * HASH_SIZE].copy()
+    sing.octolen = _len
+    return GRAVITY_OK
+
+
+# TODO untested and shaky as hell
+def pors_randsubset(rand: Hash, msg: Hash, address: Address, subset: PorsSubset):
+    seed = hash_2N_to_N(rand, msg)
+    rand_stream = aesctr256_zeroiv(hash_to_bytes(seed), STREAMLEN)
+    addr = 0
+    count = 0
+    offset = 0
+    for i in range(HASH_SIZE):
+        byte = rand_stream[i]
+        addr = (addr << 8) | byte
+        addr &= GRAVITY_mask
+    address.index = addr
+    while count < PORS_k:
+        # shaky shaky xd
+        index = rand_stream[HASH_SIZE + offset: HASH_SIZE + offset + 32] % PORS_t
+        offset += BYTES_PER_INDEX
+        duplicate = False
+        for i in range(count):
+            if subset.s[i] == index:
+                duplicate = True
+                break
+        if duplicate:
+            subset.s[count] = index
+            count += 1
 
 # -------------------------------------------- TEST UTILS
 

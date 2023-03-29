@@ -11,6 +11,15 @@ class Hash:
         else:
             self.h = [None for _ in range(HASH_SIZE)]  # uint8_t h[HASH_SIZE];
 
+    # TODO untested
+    def __eq__(self, other):
+        if isinstance(other, Hash):
+            for i in range(HASH_SIZE):
+                if self.h[i] != other.h[i]:
+                    return False
+            return True
+        return False
+
 
 class Address:
     def __init__(self, index, layer):
@@ -72,9 +81,9 @@ def hash_to_N(src):
 
 
 # WORKS
-def hash_compress_pairs(dst: [Hash], src: [Hash], count: int):
+def hash_compress_pairs(buf: [Hash], dst_id: int, src_id: int, count: int):
     for i in range(count):
-        dst[i] = hash_2N_to_N(src[i*2], src[i*2+1])
+        buf[dst_id + i] = hash_2N_to_N(buf[src_id + i * 2], buf[ src_id + i * 2 + 1])
 
 
 def hash_compress_all(src):

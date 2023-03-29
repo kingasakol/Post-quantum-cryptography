@@ -3,7 +3,7 @@ from functools import lru_cache
 from finished.hash import Hash, Address, hashcpy, hash_2N_to_N
 from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
 from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau, GRAVITY_ERR_VERIF
-from utils.hash_utlis import hash_to_bytes
+from utils.hash_utlis import hash_to_bytes, list_of_hashes_to_bytes
 
 
 class MerklePK:

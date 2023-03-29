@@ -21,7 +21,7 @@ def aesctr256(sk: bytes, counter: bytes, bytes_: int) -> bytes:
     return out
 
 
-def aesctr256_zeroiv(sk, bytes_):
+def aesctr256_zeroiv(sk: bytes, bytes_: int) -> bytes:
     return aesctr256(sk, bytes.fromhex("00" * 16), bytes_)
 
 
