@@ -23,7 +23,7 @@ def gravity_gensk(sk: GravitySk) -> int:
     mpk = MerklePK()
     address = Address(None, 0)
     for i in range(n):
-        print(f"[INFO] Generating Secret key {i+1}/{n}")
+        print(f"[INFO] Generating Secret key {i}/{n}")
         address.index = i * MERKLE_hhh
         res = merkle_genpk(sk.seed, address, mpk)
         if res != GRAVITY_OK:
