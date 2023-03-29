@@ -27,17 +27,6 @@ class Address:
         self.layer = layer
 
 
-def hashcmp(a, b):
-    return hashcmpN(a, b, HASH_SIZE)
-
-
-def hashcmpN(a, b, N):
-    for i in range(16):
-        if a.h[i] != b.h[i]:
-            return False
-    return True
-
-
 def hashcpy(a: Hash, b: Hash):
     a.h = b.h.copy()
 

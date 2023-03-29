@@ -12,9 +12,23 @@ class MerklePK:
 
 
 class MerkleSign:
-    def __init__(self):
-        self.wots = WotsSign()
-        self.auth = [Hash() for _ in range(MERKLE_h)]
+    def __init__(self, src=None):
+        if src:
+            self.wots = WotsSign(src)
+            self.auth = [Hash(src[HASH_SIZE * (WOTS_ell + i): HASH_SIZE * (WOTS_ell + i + 1)]) for i in range(MERKLE_h)]
+        else:
+            self.wots = WotsSign()
+            self.auth = [Hash() for _ in range(MERKLE_h)]
+
+    def __eq__(self, other):
+        if isinstance(other, MerkleSign):
+            if self.wots != other.wots:
+                return False
+            for i in range(len(MERKLE_h)):
+                if self.auth[i] != other.auth[i]:
+                    return False
+            return True
+        return False
 
 
 # util - performs hash_compress_pairs but uses "continuous memory" and "pointers"

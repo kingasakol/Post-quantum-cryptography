@@ -24,8 +24,19 @@ class LwotsPK:
 
 
 class WotsSign:
-    def __init__(self):
-        self.s = [Hash() for _ in range(WOTS_ell)]
+    def __init__(self, src=None):
+        if src:
+            self.s = [Hash(src[i * HASH_SIZE: (i+1) * HASH_SIZE]) for i in range(WOTS_ell)]
+        else:
+            self.s = [Hash() for _ in range(WOTS_ell)]
+
+    def __eq__(self, other):
+        if isinstance(other, WotsSign):
+            for i in range(len(WOTS_ell)):
+                if self.s[i] != other.s[i]:
+                    return False
+            return True
+        return False
 
 
 # HAS TRANSITIVE TEST
