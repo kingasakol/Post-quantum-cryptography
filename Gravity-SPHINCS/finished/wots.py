@@ -2,7 +2,7 @@ from finished.hash import hash_N_to_N_chain, Hash, Address, hash_parallel_chains
 from shaky.common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
 from finished.aes import aesctr256
 from finished.ltree import ltree
-from utils.hash_utlis import hash_to_bytes, list_of_hashes_to_bytes
+from utils.hash_utlis import list_of_hashes_to_bytes
 from utils.bytes_utils import int_list_to_bytes
 from utils.key_utils import gensk
 
@@ -149,7 +149,7 @@ def sample_lwots_genpk():
 def lwots_genpk_test():
     p = sample_lwots_genpk()
     expected = "3f44b236e974988ff0959beeb4b10d1dcf63112a1814bf222c7f3bdb095b08b7"
-    if hash_to_bytes(p.k).hex() != expected:
+    if (p.k.to_bytes()).hex() != expected:
         raise Exception("Test failed")
 
 
@@ -159,7 +159,7 @@ def lwots_extract_test():
     p = LwotsPK()
     lwots_extract(p, s, h)
     expected = "30774304e6020b3592764cf73f30d72daecb9ea544ba1e06a71167699c9d7e22"
-    if hash_to_bytes(p.k).hex() != expected:
+    if p.k.to_bytes().hex() != expected:
         raise Exception("Test failed")
 
 

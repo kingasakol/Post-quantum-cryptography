@@ -1,21 +1,23 @@
 from finished.hash import Hash
-from utils.bytes_utils import int_list_to_bytes
-
-
-def hash_to_bytes(h: Hash) -> bytes:
-    return int_list_to_bytes(h.h)
+from shaky.common import HASH_SIZE
+from utils.bytes_utils import bytes_to_int_list
 
 
 def list_of_hashes_to_bytes(h: [Hash]) -> bytes:
     arr = b''
     for x in h:
-        arr += hash_to_bytes(x)
+        arr += x.to_bytes()
     return arr
+
+
+def hashes_from_bytes(b: bytes) -> [Hash]:
+    ints = bytes_to_int_list(b)
+    return [Hash(ints[i * HASH_SIZE: (i + 1) * HASH_SIZE]) for i in range(len(ints) // HASH_SIZE)]
 
 
 if __name__ == "__main__":
     a = Hash()
     a.h = [i for i in range(32)]
     b = Hash()
-    b.h = [3*i for i in range(32)]
-    print(list_of_hashes_to_bytes([a,b]).hex())
+    b.h = [3 * i for i in range(32)]
+    print(list_of_hashes_to_bytes([a, b]).hex())

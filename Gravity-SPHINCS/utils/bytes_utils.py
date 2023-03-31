@@ -8,5 +8,5 @@ def int_list_to_bytes(l: [int]) -> bytes:
 
 
 def bytes_to_int_list(b: bytes) -> [int]:
-    return [b[i] for i in range(len(b))]
+    return [*b]
 

@@ -1,5 +1,4 @@
 import itertools
-import copy
 
 MPAR = 1
 ROUNDS = 5 + 1

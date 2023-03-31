@@ -20,6 +20,12 @@ class Hash:
             return True
         return False
 
+    def __repr__(self):
+        return self.to_bytes().hex()
+
+    def to_bytes(self):
+        return int_list_to_bytes(self.h)
+
 
 class Address:
     def __init__(self, index, layer):
