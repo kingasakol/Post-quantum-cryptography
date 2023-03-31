@@ -13,13 +13,14 @@ from utils.hash_utlis import list_of_hashes_to_bytes, hashes_from_bytes
 
 
 class GravitySK:
-    def __init__(self, seed: Hash, cache=None):
+    def __init__(self, seed: Hash, cache=None, salt=None):
         self.seed = seed
         self.salt = Hash()
+        self.cache = [Hash() for _ in range(2 * GRAVITY_ccc - 1)]
         if cache:
             self.cache = cache
-        else:
-            self.cache = [Hash() for _ in range(2 * GRAVITY_ccc - 1)]
+        if salt:
+            self.salt = salt
 
 
 class GravitySign:
@@ -43,6 +44,9 @@ class GravitySign:
                 if self.auth[i] != other.auth[i]:
                     return False
         return False
+
+    def __repr__(self):
+        return f'GRAVITY SIGN: {{rand: {self.rand}, op_sign: {self.op_sign}, merkle: {self.merkle}, auth: {self.auth}}}'
 
 
 class GravityPK:
@@ -89,7 +93,7 @@ def gravity_sign(sk: GravitySK, sign: GravitySign, msg: Hash) -> int:
     mpk = MerklePK()
 
     sign.rand = hash_2N_to_N(sk.salt, msg)
-    pors_randsubset(sign.rand, msg, address.index, subset)
+    pors_randsubset(sign.rand, msg, address, subset)
     pors_gensk(sk.seed, address, psk)
     octoporst_sign(psk, sign.op_sign, ppk, subset)
     h = Hash(ppk.k.h.coppy())
@@ -192,24 +196,26 @@ def get_expected_SK() -> GravitySK:
     if GRAVITY_c == 1:
         cache = bytes.fromhex(
             "20b97e26ac1c97d2cba431e1c75a6909b743bb7cf260dc076929e2a842ffb90543eb2967250331694e7aea03dc339f3b46809382f0c659951f6dae0b557da014a73e2eb8e10194f424bdafd86ad6c89cf90b9849fe19aeca38c9668512eac6a2")
-        return GravitySK(Hash([i for i in range(32)]), hashes_from_bytes(cache))
+        return GravitySK(Hash([i for i in range(32)]), hashes_from_bytes(cache), Hash([i for i in range(32)]))
     elif GRAVITY_c == 3:
         cache = bytes.fromhex(
             "20b97e26ac1c97d2cba431e1c75a6909b743bb7cf260dc076929e2a842ffb90543eb2967250331694e7aea03dc339f3b46809382f0c659951f6dae0b557da014ab88fcf77a62090031a5d4c50c79c6da512a35a53bf968d45611edd644df2266c3b9833b1b2498061598598322063cbdb9a5268ffdaac1703e695f0f82dd72c2c7349f3173e5b57335106420319e0e1cc24c9b51e646363513e104e5781489f75f6efe62cb64f40adb01244579db1de28df498e09ed6afb0e588748d7c2cf3f271bf4fea6e9e72ae088d68fece5e82b22ae0b07a3850c284c6416094ca72b5856241448c9fa36a747f2ac02c78a5256e194596dc25997c31b812d256adfd99caa73e2eb8e10194f424bdafd86ad6c89cf90b9849fe19aeca38c9668512eac6a2f46676ac683839687a9fd6669df9bd5116de7096ac2b25b1ff8e1a5d4b75c65dc1bf3bd78915bf4aa561ea110554d2248b1b3645efc8fb57a721b41e753eef6d00e3932fa5e9996cfaa26d2bbfffc4d902c6941c9e637de452a8318928022a75d42a40813a0828da07357718a69887620cd831d565dc64799f71195b37367c8f8cbf7c5004f7bc9b2b9f40bc016674d468fe931c71a7e21ec3d893f4d48323fa417d807ebfb44d62d88d4681854f8741effd7168b6230ea4264a54c0832c797b")
-        return GravitySK(Hash([i for i in range(32)]), hashes_from_bytes(cache))
+        return GravitySK(Hash([i for i in range(32)]), hashes_from_bytes(cache), Hash([i for i in range(32)]))
 
 
 def gravity_sign_test():
     sk = get_expected_SK()
     sign = GravitySign()
-    gravity_sign(sk, sign, Hash([i*2 for i in HASH_SIZE]))
+    print(sign)
+    gravity_sign(sk, sign, Hash([i*2 for i in range(HASH_SIZE)]))
     print(sign.op_sign)
 
 
 if __name__ == "__main__":
+    gravity_sign_test()
+
     if GRAVITY_c != 1 and GRAVITY_c != 3:
         raise Exception("To run tests set GRAVITY_c to 1 or 3 fot this test")
     gravity_genpk_test()
     gravity_gensk_test()
-    gravity_sign_test()
     print("ok")

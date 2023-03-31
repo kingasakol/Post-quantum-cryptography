@@ -24,7 +24,11 @@ class Hash:
         return self.to_bytes().hex()
 
     def to_bytes(self):
-        return int_list_to_bytes(self.h)
+        b = [(x.to_bytes(1, "big")) if x is not None else bytes(1) for x in self.h]
+        arr = b''
+        for x in b:
+            arr += x
+        return arr
 
 
 class Address:

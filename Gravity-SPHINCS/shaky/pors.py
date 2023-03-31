@@ -2,6 +2,7 @@ from finished.aes import aesctr256_zeroiv
 from finished.hash import Hash, Address, hash_parallel, hash_2N_to_N
 from shaky.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_ERR_VERIF, GRAVITY_mask
 from shaky.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
+from utils.bytes_utils import bytes_to_int_list
 from utils.hash_utlis import list_of_hashes_to_bytes
 from utils.key_utils import gensk
 
@@ -148,7 +149,6 @@ def octoporst_loadsign(sing: OctoporstSign, _sign: [int], _len: int) -> int:
     return GRAVITY_OK
 
 
-# TODO untested and shaky as hell
 def pors_randsubset(rand: Hash, msg: Hash, address: Address, subset: PorsSubset):
     seed = hash_2N_to_N(rand, msg)
     rand_stream = aesctr256_zeroiv(seed.to_bytes(), STREAMLEN)
@@ -162,14 +162,14 @@ def pors_randsubset(rand: Hash, msg: Hash, address: Address, subset: PorsSubset)
     address.index = addr
     while count < PORS_k:
         # shaky shaky xd
-        index = rand_stream[HASH_SIZE + offset: HASH_SIZE + offset + 32] % PORS_t
+        index = int.from_bytes(rand_stream[HASH_SIZE + offset: HASH_SIZE + offset + 32][:4], byteorder='big') % PORS_t
         offset += BYTES_PER_INDEX
         duplicate = False
         for i in range(count):
             if subset.s[i] == index:
                 duplicate = True
                 break
-        if duplicate:
+        if not duplicate:
             subset.s[count] = index
             count += 1
 
@@ -197,6 +197,18 @@ def pors_gensk_test():
     return w
 
 
+def pors_randsubset_test():
+    rand = Hash(bytes_to_int_list(bytes.fromhex("116ec7ec0055b52f72310cdda417263458a58979c93dbc3c622cbdd424045c3f")))
+    msg = Hash(bytes_to_int_list(bytes.fromhex("00020406080a0c0e10121416181a1c1e20222426282a2c2e30323436383a3c3e")))
+    adr = Address(None, 10)
+    res = PorsSubset()
+    pors_randsubset(rand, msg, adr, res)
+    if res.s != [50092, 52, 21074, 47954, 43329, 31136, 978, 61975, 7743, 64745, 14179, 1479, 17219, 25654, 55747,
+                 58372, 46594, 10874, 55379, 47168, 50223, 19753, 45369, 39452, 60707, 51198, 18986, 7546]:
+        raise Exception("Test failed")
+
+
 if __name__ == "__main__":
     pors_gensk_test()
+    pors_randsubset_test()
     print("ok")

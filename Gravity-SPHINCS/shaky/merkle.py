@@ -29,6 +29,9 @@ class MerkleSign:
             return True
         return False
 
+    def __repr__(self):
+        return f'MERKLE SIGN: {{ wots: {self.wots}, auth: {self.auth}}}'
+
 
 # util - performs hash_compress_pairs but uses "continuous memory" and "pointers"
 def hash_compress_pairs_one_list(src: [Hash], id_1: int, id_2: int, n: int):

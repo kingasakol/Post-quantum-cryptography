@@ -38,6 +38,9 @@ class WotsSign:
             return True
         return False
 
+    def __repr__(self):
+        return f'WOTS SIGN: {{ s: {self.s}}}'
+
 
 # HAS TRANSITIVE TEST
 def wots_chain(src: Hash, count: int) -> Hash:
