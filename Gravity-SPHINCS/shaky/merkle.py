@@ -36,6 +36,10 @@ class MerkleSign:
     def hex(self):
         return list_of_hashes_to_bytes(self.wots.s).hex() + list_of_hashes_to_bytes(self.auth).hex()
 
+    @staticmethod
+    def size():
+        return WotsSign.size() + HASH_SIZE * MERKLE_h
+
 
 # util - performs hash_compress_pairs but uses "continuous memory" and "pointers"
 def hash_compress_pairs_one_list(src: [Hash], id_1: int, id_2: int, n: int):

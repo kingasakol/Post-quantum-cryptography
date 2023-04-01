@@ -41,6 +41,9 @@ class WotsSign:
     def __repr__(self):
         return f'WOTS SIGN: {{ s: {self.s}}}'
 
+    @staticmethod
+    def size():
+        return HASH_SIZE * WOTS_ell
 
 # HAS TRANSITIVE TEST
 def wots_chain(src: Hash, count: int) -> Hash:
