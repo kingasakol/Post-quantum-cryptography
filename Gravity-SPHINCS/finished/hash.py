@@ -57,9 +57,8 @@ def hashswap(a: Hash, b: Hash):
     b.h = tmp
 
 
-# not using dest
 def hash_N_to_N(src):
-    return haraka256_256(src.h)
+    return Hash(haraka256_256(src.h))
 
 
 def hash_N_to_N_chain(src: Hash, chinelen: int) -> Hash:

@@ -12,12 +12,15 @@ STREAMLEN = 8 * PORS_k + HASH_SIZE
 
 class PorsSubset:
     def __init__(self):
-        self.s = [None for _ in range(PORS_k)]
+        self.s = [None for _ in range(PORS_k)]  # [int]
 
 
 class PorsSK:
     def __init__(self):
         self.k = [Hash() for _ in range(PORS_t)]
+
+    def __repr__(self):
+        print(f'PORS SK: {{k: {self.k}}}')
 
 
 class PorsPK:
@@ -33,7 +36,7 @@ class PorsKeyPair():
 
 class PorsSign:
     def __init__(self):
-        self.s = [None for _ in range(PORS_k)]
+        self.s = [Hash() for _ in range(PORS_k)]
 
     # TODO untested
     def __eq__(self, other):
@@ -44,10 +47,13 @@ class PorsSign:
             return True
         return False
 
+    def __repr__(self):
+        return f'PORS SIGN: {{s:{self.s}}}'
+
 
 class PorstPK:
     def __init__(self):
-        self.k = None
+        self.k = Hash()
 
 
 class PorstKeypair:
@@ -73,17 +79,20 @@ class OctoporstSign:
             return self.s == other.s
         return False
 
+    def __repr__(self):
+        return f'OCTOPORST SIGN: {{s: {self.s}, octopus: {self.octopus}, octolen: {self.octolen}}}'
+
 
 # TESTED
 def pors_gensk(key: Hash, address: Address, sk: PorsSK):
     gensk(key, address, sk, PORS_t)
 
 
-# TODO UNTESTED
+# TESTED BY GRAVITY SIGN
 def pors_sign(sk: PorsSK, sign: PorsSign, subset: PorsSubset):
     for i in range(PORS_k):
         index = subset.s[i]
-        sign.s[i] = sk.k[index].h.copy()
+        sign.s[i].h = sk.k[index].h.copy()
 
 
 # TODO UNTESTED
@@ -102,13 +111,13 @@ def sort_subset(subset: PorsSubset):
     subset.s.sort()
 
 
-# TODO UNTESTED
+# TESTED BY GRAVITY SIGN
 def octoporst_sign(sk: PorsSK, sign: OctoporstSign, pk: PorstPK, subset: PorsSubset) -> int:
     sort_subset(subset)
     pors_sign(sk, sign.s, subset)
     buf = merkle_alloc_buf(PORS_tau)
     hash_parallel(buf, sk.k, PORS_t)
-    merkle_gen_octopus(buf, PORS_tau, sign.octopus, sign.octolen, pk.k, subset.s, PORS_k)
+    sign.octolen = merkle_gen_octopus(buf, PORS_tau, sign.octopus, pk.k, subset.s, PORS_k)
     return GRAVITY_OK
 
 
@@ -149,6 +158,7 @@ def octoporst_loadsign(sing: OctoporstSign, _sign: [int], _len: int) -> int:
     return GRAVITY_OK
 
 
+# TESTED
 def pors_randsubset(rand: Hash, msg: Hash, address: Address, subset: PorsSubset):
     seed = hash_2N_to_N(rand, msg)
     rand_stream = aesctr256_zeroiv(seed.to_bytes(), STREAMLEN)

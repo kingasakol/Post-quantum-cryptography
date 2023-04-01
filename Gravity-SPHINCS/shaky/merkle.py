@@ -3,6 +3,7 @@ from functools import lru_cache
 from finished.hash import Hash, Address, hashcpy, hash_2N_to_N
 from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
 from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau, GRAVITY_ERR_VERIF
+from utils.hash_utlis import list_of_hashes_to_bytes
 
 
 class MerklePK:
@@ -31,6 +32,9 @@ class MerkleSign:
 
     def __repr__(self):
         return f'MERKLE SIGN: {{ wots: {self.wots}, auth: {self.auth}}}'
+
+    def hex(self):
+        return list_of_hashes_to_bytes(self.wots.s).hex() + list_of_hashes_to_bytes(self.auth).hex()
 
 
 # util - performs hash_compress_pairs but uses "continuous memory" and "pointers"
@@ -126,7 +130,7 @@ def merkle_gen_auth(buf: [Hash], height: int, auth: [Hash], index: int, root: Ha
         hash_compress_pairs_one_list(buf, dst_id, src_id, n)
     # Public key
     if root is not None:
-        root.h = buf[0].h.copy()
+        root.h = buf[dst_id].h.copy()
 
 
 # TESTED BY TRANSITION
@@ -143,7 +147,7 @@ def merkle_compress_auth(node: Hash, index: int, auth: [Hash], height_diff: int)
 
 # todo operates on buf in c-like pointer style,
 # returns octolen as int is primitive
-# TODO UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED UNTESTED
+# TESTED BY GRAVITY SIGN
 def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, indices: [int], count: int) -> int:
     n = 1 << height
     src_id = n
@@ -239,6 +243,8 @@ def merkle_sign_sample():
     sign = MerkleSign()
     msg = Hash([50 - i for i in range(32)])
     merkle_sign(key, address, sign, msg, pk)
+    if pk.k.to_bytes().hex() != "aec33cd1c1a4d1d5ea80d80f7d55d098e74db406e764a92d260f0cf183ae4e1e":
+        raise Exception("Test failed")
     return sign
 
 
