@@ -24,7 +24,7 @@ class MerkleSign:
         if isinstance(other, MerkleSign):
             if self.wots != other.wots:
                 return False
-            for i in range(len(MERKLE_h)):
+            for i in range(MERKLE_h):
                 if self.auth[i] != other.auth[i]:
                     return False
             return True
@@ -36,9 +36,21 @@ class MerkleSign:
     def hex(self):
         return list_of_hashes_to_bytes(self.wots.s).hex() + list_of_hashes_to_bytes(self.auth).hex()
 
+    def bytes(self):
+        return list_of_hashes_to_bytes(self.wots.s) + list_of_hashes_to_bytes(self.auth)
+
     @staticmethod
     def size():
         return WotsSign.size() + HASH_SIZE * MERKLE_h
+
+    @staticmethod
+    def load(merkle: [int]) -> 'MerkleSign':
+        res = MerkleSign()
+        for i in range(WOTS_ell):
+            res.wots.s[i] = Hash(merkle[HASH_SIZE * i: HASH_SIZE * (i + 1)])
+        for i in range(MERKLE_h):
+            res.auth[i] = Hash(merkle[WotsSign.size() + i * HASH_SIZE: WotsSign.size() + (i + 1) * HASH_SIZE])
+        return res
 
 
 # util - performs hash_compress_pairs but uses "continuous memory" and "pointers"
@@ -50,6 +62,12 @@ def hash_compress_pairs_one_list(src: [Hash], id_1: int, id_2: int, n: int):
 def merkle_alloc_buf(n: int) -> [None]:
     return [None for _ in range(2 * (1 << n))]
 
+
+def merkle_sign_list_to_bytes(signs: [MerkleSign]) -> bytes:
+    res = b''
+    for s in signs:
+        res += s.bytes()
+    return res
 
 # todo don't think that return is needed
 # TESTED

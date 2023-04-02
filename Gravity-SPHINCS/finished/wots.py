@@ -1,9 +1,7 @@
 from finished.hash import hash_N_to_N_chain, Hash, Address, hash_parallel_chains
 from shaky.common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
-from finished.aes import aesctr256
 from finished.ltree import ltree
 from utils.hash_utlis import list_of_hashes_to_bytes
-from utils.bytes_utils import int_list_to_bytes
 from utils.key_utils import gensk
 
 
@@ -26,13 +24,13 @@ class LwotsPK:
 class WotsSign:
     def __init__(self, src=None):
         if src:
-            self.s = [Hash(src[i * HASH_SIZE: (i+1) * HASH_SIZE]) for i in range(WOTS_ell)]
+            self.s = [Hash(src[i * HASH_SIZE: (i + 1) * HASH_SIZE]) for i in range(WOTS_ell)]
         else:
             self.s = [Hash() for _ in range(WOTS_ell)]
 
     def __eq__(self, other):
         if isinstance(other, WotsSign):
-            for i in range(len(WOTS_ell)):
+            for i in range(WOTS_ell):
                 if self.s[i] != other.s[i]:
                     return False
             return True
@@ -44,6 +42,7 @@ class WotsSign:
     @staticmethod
     def size():
         return HASH_SIZE * WOTS_ell
+
 
 # HAS TRANSITIVE TEST
 def wots_chain(src: Hash, count: int) -> Hash:
