@@ -21,6 +21,9 @@ class GravitySK:
         if salt:
             self.salt = salt
 
+    def save(self) -> bytes:
+        return self.seed.to_bytes() + self.salt.to_bytes() + list_of_hashes_to_bytes(self.cache)
+
 
 class GravitySign:
     def __init__(self):
@@ -78,7 +81,7 @@ class GravityPK:
 
 
 # TESTED
-def gravity_gensk(sk: GravitySK) -> int:
+def gravity_gensk(sk: GravitySK):
     n = GRAVITY_ccc
     dst_id = 0
     mpk = MerklePK()
