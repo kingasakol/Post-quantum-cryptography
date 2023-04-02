@@ -1,5 +1,5 @@
 from finished.hash import Hash
-from shaky.common import HASH_SIZE
+from finished.common import HASH_SIZE
 from utils.bytes_utils import bytes_to_int_list
 
 

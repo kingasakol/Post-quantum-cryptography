@@ -1,8 +1,6 @@
-from functools import lru_cache
-
-from finished.hash import Hash, Address, hashcpy, hash_2N_to_N
+from finished.hash import Hash, Address, hash_2N_to_N
 from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
-from shaky.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, PORS_k, PORS_tau, GRAVITY_ERR_VERIF
+from finished.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, GRAVITY_ERR_VERIF
 from utils.hash_utlis import list_of_hashes_to_bytes
 
 
@@ -69,9 +67,9 @@ def merkle_sign_list_to_bytes(signs: [MerkleSign]) -> bytes:
         res += s.bytes()
     return res
 
-# todo don't think that return is needed
+
 # TESTED
-def merkle_genpk(key: Hash, address: Address, pk: MerklePK) -> int:
+def merkle_genpk(key: Hash, address: Address, pk: MerklePK):
     index = address.index & (MERKLE_hhh - 1)
     base_address = Address(address.index - index, address.layer)
     wsk = WotsSK()
@@ -86,8 +84,6 @@ def merkle_genpk(key: Hash, address: Address, pk: MerklePK) -> int:
         base_address.index += 1
 
     merkle_compress_all(buf, MERKLE_h, pk.k)
-
-    return GRAVITY_OK
 
 
 # TESTED
@@ -203,8 +199,8 @@ def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, in
     return length
 
 
-# TODO UNTESTED
 # TODO RETURNS INT
+# TESTED BY GRAVITY_VERIFY
 def merkle_compress_octopus(nodes: [Hash], height: int, octopus: [Hash], octolen: int, indices: [int],
                             count: int) -> int:
     length = 0
@@ -218,25 +214,24 @@ def merkle_compress_octopus(nodes: [Hash], height: int, octopus: [Hash], octolen
                 buf[0] = Hash(nodes[i].h.copy())
                 if (i + 1) < count and indices[i + 1] == index + 1:
                     i += 1
-                    buf[1] = Hash([nodes[i].h.copy()])
+                    buf[1] = Hash(nodes[i].h.copy())
                 else:
-                    if len == octolen:
+                    if length == octolen:
                         return GRAVITY_ERR_VERIF
                     buf[1] = Hash(octopus[length].h.copy())
                     length += 1
             else:
-                if len == octolen:
+                if length == octolen:
                     return GRAVITY_ERR_VERIF
-                buf[0] = Hash([octopus[length].h.copy()])
+                buf[0] = Hash(octopus[length].h.copy())
                 length += 1
-                buf[1] = Hash([nodes[i].h.copy()])
-            i += 1
-            j += 1
+                buf[1] = Hash(nodes[i].h.copy())
             nodes[j] = hash_2N_to_N(buf[0], buf[1])
             indices[j] = indices[i] >> 1
+            i += 1
+            j += 1
         count = j
-
-    if len != octolen:
+    if length != octolen:
         return GRAVITY_ERR_VERIF
     return GRAVITY_OK
 
@@ -295,15 +290,6 @@ def merkle_extract_test():
     expected = "e754635abcd170df8bbe469c29ecf2b265096e5fe13b89f0a412aedd85fa6e13"
     if pk.k.to_bytes().hex() != expected:
         raise Exception("Test failed")
-
-
-def merkle_gen_octopus_test():
-    # def merkle_gen_octopus(buf: [Hash], height: int, octopus: [Hash], root: Hash, indices: [int], count: int) -> int:
-    buf = merkle_alloc_buf(16)
-    height = PORS_tau
-    octopus = [i % 10 for i in range(PORS_k * PORS_tau)]
-    root = [15 for _ in range(HASH_SIZE)]
-    # todo
 
 
 if __name__ == "__main__":

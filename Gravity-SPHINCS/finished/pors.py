@@ -1,7 +1,7 @@
 from finished.aes import aesctr256_zeroiv
 from finished.hash import Hash, Address, hash_parallel, hash_2N_to_N
-from shaky.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_ERR_VERIF, GRAVITY_mask
-from shaky.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
+from finished.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_mask
+from finished.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
 from utils.bytes_utils import bytes_to_int_list
 from utils.hash_utlis import list_of_hashes_to_bytes
 from utils.key_utils import gensk
@@ -120,7 +120,7 @@ def pors_sign(sk: PorsSK, sign: PorsSign, subset: PorsSubset):
         sign.s[i].h = sk.k[index].h.copy()
 
 
-# TODO UNTESTED
+# TODO UNUSED?
 # TODO returns int
 def porst_genpk(sk: PorsSK, pk: PorstPK) -> int:
     buf = merkle_alloc_buf(PORS_tau)
@@ -129,7 +129,7 @@ def porst_genpk(sk: PorsSK, pk: PorstPK) -> int:
     return GRAVITY_OK
 
 
-# TODO UNTESTED
+# TESTED BY GRAVITY VERIFY
 # authors use selection sort here but we don't have to
 # TODO or do we? maybe it is ~o(n) here, leaving func in case we want to optimize it
 def sort_subset(subset: PorsSubset):
@@ -146,7 +146,7 @@ def octoporst_sign(sk: PorsSK, sign: OctoporstSign, pk: PorstPK, subset: PorsSub
     return GRAVITY_OK
 
 
-# TODO UNTESTED
+# TESTED BY GRAVITY VERIFY
 # TODO returns int
 def octoporst_extract(pk: PorstPK, sign: OctoporstSign, subset: PorsSubset) -> int:
     tmp = [Hash() for _ in range(PORS_k)]

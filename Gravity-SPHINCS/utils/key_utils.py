@@ -1,6 +1,6 @@
 from finished.aes import aesctr256
 from finished.hash import Address, Hash
-from shaky.common import HASH_SIZE
+from finished.common import HASH_SIZE
 from utils.bytes_utils import int_list_to_bytes
 
 
