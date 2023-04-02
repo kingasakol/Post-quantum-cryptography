@@ -71,10 +71,9 @@ def hash_2N_to_N(src1: Hash, src2: Hash) -> Hash:
 
 
 # WARNING: accepts bytes!
-def hash_to_N(src):
-    s = int_list_to_bytes(src)
+def hash_to_N(src: bytes) -> bytes:
     h = hashlib.sha256()
-    h.update(s)
+    h.update(src)
     return h.digest()
 
 

@@ -24,6 +24,18 @@ class GravitySK:
     def save(self) -> bytes:
         return self.seed.to_bytes() + self.salt.to_bytes() + list_of_hashes_to_bytes(self.cache)
 
+    @staticmethod
+    def load(src: bytes) -> 'GravitySK':
+        seed = Hash(bytes_to_int_list(src[:HASH_SIZE]))
+        src = src[HASH_SIZE:]
+        salt = Hash(bytes_to_int_list(src[:HASH_SIZE]))
+        src = src[HASH_SIZE:]
+        cache = hashes_from_bytes(src)
+        return GravitySK(seed, cache, salt)
+
+    def __repr__(self):
+        return f"GRAVITY SK: {{seed: {self.seed}, salt: {self.salt}, cache:{self.cache}}}"
+
 
 class GravitySign:
     def __init__(self):
