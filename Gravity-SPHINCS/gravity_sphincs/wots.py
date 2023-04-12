@@ -1,6 +1,6 @@
-from finished.hash import hash_N_to_N_chain, Hash, Address, hash_parallel_chains
-from finished.common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
-from finished.ltree import ltree
+from gravity_sphincs.hash import hash_N_to_N_chain, Hash, Address, hash_parallel_chains
+from gravity_sphincs.common import WOTS_ell, HASH_SIZE, WOTS_ell1, WOTS_w
+from gravity_sphincs.ltree import ltree
 from utils.hash_utlis import list_of_hashes_to_bytes
 from utils.key_utils import gensk
 

@@ -1,11 +1,11 @@
 
 # todo  global todo, octolen is trash
-from finished.hash import Hash, Address, hash_compress_pairs, hash_2N_to_N
-from finished.common import GRAVITY_ccc, GRAVITY_d, GRAVITY_c, MERKLE_hhh, GRAVITY_OK, MERKLE_h, GRAVITY_ERR_VERIF, \
+from gravity_sphincs.hash import Hash, Address, hash_compress_pairs, hash_2N_to_N
+from gravity_sphincs.common import GRAVITY_ccc, GRAVITY_d, GRAVITY_c, MERKLE_hhh, GRAVITY_OK, MERKLE_h, GRAVITY_ERR_VERIF, \
     HASH_SIZE
-from finished.merkle import MerklePK, merkle_genpk, merkle_sign, merkle_extract, merkle_compress_auth, MerkleSign, \
+from gravity_sphincs.merkle import MerklePK, merkle_genpk, merkle_sign, merkle_extract, merkle_compress_auth, MerkleSign, \
     merkle_sign_list_to_bytes
-from finished.pors import pors_randsubset, PorsSubset, PorsSK, pors_gensk, PorstPK, octoporst_sign, octoporst_extract, \
+from gravity_sphincs.pors import pors_randsubset, PorsSubset, PorsSK, pors_gensk, PorstPK, octoporst_sign, octoporst_extract, \
     OctoporstSign
 from utils.bytes_utils import bytes_to_int_list
 from utils.hash_utlis import list_of_hashes_to_bytes, hashes_from_bytes
@@ -65,7 +65,7 @@ class GravitySign:
 
     def save(self) -> bytes:
         return self.rand.to_bytes() + merkle_sign_list_to_bytes(self.merkle) + list_of_hashes_to_bytes(
-            self.auth) + list_of_hashes_to_bytes(self.op_sign.s.s) + list_of_hashes_to_bytes(self.op_sign.octopus)
+            self.auth) + self.op_sign.save()
 
     # TESTED
     @staticmethod
@@ -83,13 +83,16 @@ class GravitySign:
             res.auth[i] = Hash(sign[HASH_SIZE * i: HASH_SIZE * (i + 1)])
         sign = sign[HASH_SIZE * GRAVITY_c:]
         length -= (HASH_SIZE + MerkleSign.size() * GRAVITY_d + HASH_SIZE * GRAVITY_c)
-        res.op_sign = OctoporstSign.load(sign, length)
+        res.op_sign = OctoporstSign.load(sign)
         return res
 
 
 class GravityPK:
-    def __init__(self):
-        self.k = Hash()
+    def __init__(self, k=None):
+        if k:
+            self.k = k
+        else:
+            self.k = Hash()
 
 
 # TESTED
@@ -133,7 +136,7 @@ def gravity_sign(sk: GravitySK, sign: GravitySign, msg: Hash):
     print(f"[INFO] Octoporst sign completed")
     h = Hash(ppk.k.h.copy())
     for layer in range(GRAVITY_d):
-        print(f"[INFO] Stating merkle sign {layer + 1} / {GRAVITY_d}")
+        print(f"[INFO] Starting merkle sign {layer + 1} / {GRAVITY_d}")
         address.layer -= 1
         merkle_sign(sk.seed, address, sign.merkle[layer], h, mpk)
         h.h = mpk.k.h.copy()

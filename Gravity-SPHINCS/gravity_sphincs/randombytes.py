@@ -1,6 +1,6 @@
 import secrets
 
-from finished.hash import Hash
+from gravity_sphincs.hash import Hash
 from utils.bytes_utils import bytes_to_int_list
 
 

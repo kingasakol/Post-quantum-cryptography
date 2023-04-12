@@ -1,4 +1,4 @@
-from finished.hash import *
+from gravity_sphincs.hash import *
 
 
 def ltree(buf: [Hash]) -> Hash:

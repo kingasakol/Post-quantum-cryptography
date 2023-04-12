@@ -1,6 +1,6 @@
-from finished.hash import Hash, Address, hash_2N_to_N
-from finished.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
-from finished.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, GRAVITY_ERR_VERIF
+from gravity_sphincs.hash import Hash, Address, hash_2N_to_N
+from gravity_sphincs.wots import WotsSign, WotsSK, LwotsPK, wots_gensk, lwots_genpk, wots_sign, lwots_extract
+from gravity_sphincs.common import MERKLE_h, MERKLE_hhh, HASH_SIZE, GRAVITY_OK, WOTS_ell, GRAVITY_ERR_VERIF
 from utils.hash_utlis import list_of_hashes_to_bytes
 
 

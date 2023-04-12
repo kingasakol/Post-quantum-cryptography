@@ -1,5 +1,5 @@
-from finished.hash import Hash
-from finished.common import HASH_SIZE
+from gravity_sphincs.hash import Hash
+from gravity_sphincs.common import HASH_SIZE
 from utils.bytes_utils import bytes_to_int_list
 
 

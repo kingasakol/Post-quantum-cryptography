@@ -1,6 +1,6 @@
-from finished.aes import aesctr256
-from finished.hash import Address, Hash
-from finished.common import HASH_SIZE
+from gravity_sphincs.aes import aesctr256
+from gravity_sphincs.hash import Address, Hash
+from gravity_sphincs.common import HASH_SIZE
 from utils.bytes_utils import int_list_to_bytes
 
 

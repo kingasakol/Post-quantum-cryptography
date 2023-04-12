@@ -1,5 +1,5 @@
-from finished.common import HASH_SIZE
-from finished.haraka import haraka256_256, haraka512_256, haraka256_256_chain
+from gravity_sphincs.common import HASH_SIZE
+from gravity_sphincs.haraka import haraka256_256, haraka512_256, haraka256_256_chain
 from utils.bytes_utils import int_list_to_bytes
 import hashlib
 

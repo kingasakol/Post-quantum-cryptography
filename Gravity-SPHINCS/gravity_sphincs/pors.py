@@ -1,7 +1,7 @@
-from finished.aes import aesctr256_zeroiv
-from finished.hash import Hash, Address, hash_parallel, hash_2N_to_N
-from finished.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_mask
-from finished.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
+from gravity_sphincs.aes import aesctr256_zeroiv
+from gravity_sphincs.hash import Hash, Address, hash_parallel, hash_2N_to_N
+from gravity_sphincs.common import PORS_t, PORS_k, HASH_SIZE, PORS_tau, GRAVITY_OK, GRAVITY_mask
+from gravity_sphincs.merkle import merkle_alloc_buf, merkle_compress_all, merkle_gen_octopus, merkle_compress_octopus
 from utils.bytes_utils import bytes_to_int_list
 from utils.hash_utlis import list_of_hashes_to_bytes
 from utils.key_utils import gensk
@@ -106,6 +106,9 @@ class OctoporstSign:
             result.octopus[i] = Hash(sign[i * HASH_SIZE: (i + 1) * HASH_SIZE])
         result.octolen = int(length)
         return result
+
+    def save(self):
+        return  list_of_hashes_to_bytes(self.s.s) + list_of_hashes_to_bytes(self.octopus[:self.octolen])
 
 
 # TESTED
