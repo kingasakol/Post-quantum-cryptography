@@ -201,24 +201,3 @@ def haraka256_256_chain(msg, chainlen):
             s[1][i] = t_[1][i] = s[1][i] ^ t_[1][i]
 
     return s[0] + s[1]
-
-'''
-Na wejściu dostaje listę bajtów jako inty np [0xAA, 0xBB...]
-'''
-if __name__ == "__main__":
-    #print(ps(haraka512_256([1 for i in range(32)] + [2 for i in range(32)])))
-    def ps(s):
-        return " ".join([hexbyte(x) for x in s])
-
-    def hexbyte(x):
-        return hex(x)[2:].zfill(2)
-  
-    #print(ps(haraka256_256([i for i in range(64)])))
-    #print(ps(haraka512_256([i for i in range(64)]))) may be wrong!
-    #print(ps(haraka256_256_chain([i for i in range(64)], 5)))
-
-    '''
-    dd 90 04 5b 92 99 32 74 ff f8 cc f4 69 03 d1 c8 18 4b 40 4c c8 37 35 55 1c 80 a7 2b 5f b3 20 45
-    0e 27 51 4e 8a b7 b4 ee 15 3c 9a 54 13 fb 1e 98 4a 91 4f 5b 6f ea 17 22 85 41 ce 17 07 fc 4e 64
-    ae 13 7b 6f 07 3c a8 60 2d 6c a2 06 6a 64 b4 5f 8f e9 76 be a2 ee b5 ce 1c 2e eb aa f7 00 46 36
-    '''

@@ -1,6 +1,5 @@
 from gravity_sphincs.common import HASH_SIZE
-from gravity_sphincs.haraka import haraka256_256, haraka512_256, haraka256_256_chain
-from utils.bytes_utils import int_list_to_bytes
+from primitives.haraka import haraka256_256, haraka512_256, haraka256_256_chain
 import hashlib
 
 
@@ -9,9 +8,8 @@ class Hash:
         if h:
             self.h = h
         else:
-            self.h = [None for _ in range(HASH_SIZE)]  # uint8_t h[HASH_SIZE];
+            self.h = [None for _ in range(HASH_SIZE)]
 
-    # TODO untested
     def __eq__(self, other):
         if isinstance(other, Hash):
             for i in range(HASH_SIZE):
@@ -70,14 +68,12 @@ def hash_2N_to_N(src1: Hash, src2: Hash) -> Hash:
     return Hash(haraka512_256(src1.h + src2.h))
 
 
-# WARNING: accepts bytes!
 def hash_to_N(src: bytes) -> bytes:
     h = hashlib.sha256()
     h.update(src)
     return h.digest()
 
 
-# WORKS
 def hash_compress_pairs(buf: [Hash], dst_id: int, src_id: int, count: int):
     for i in range(count):
         buf[dst_id + i] = hash_2N_to_N(buf[src_id + i * 2], buf[ src_id + i * 2 + 1])
@@ -96,17 +92,3 @@ def hash_parallel(dst: [Hash], src: [Hash], count: int):
 
 def hash_parallel_chains(src: [Hash], chinelen: int) -> [Hash]:
     return [hash_N_to_N_chain(s, chinelen) for s in src]
-
-
-if __name__ == "__main__":
-    print(hash_to_N(bytes.fromhex("00" * 6)).hex())
-    '''
-    b0f66adc83641586656866813fd9dd0b8ebb63796075661ba45d1aa8089e1d44
-    '''
-    h1 = Hash()
-    h2 = Hash()
-    for i in range(HASH_SIZE):
-        h1.h[i] = 60
-        h2.h[i] = 9
-    print(int_list_to_bytes(
-        hash_2N_to_N(h1, h2).h).hex())  # 501b7e0d91defc20b7813d46a31838785af8a5aa21d86e57b92799d3bf178757
