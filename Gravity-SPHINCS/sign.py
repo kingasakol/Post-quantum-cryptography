@@ -33,4 +33,4 @@ def crypto_sign_open(sm: bytes, pk: bytes) -> (bool, bytes):
     sig = GravitySign.load(sm[mlen:])
     m = sm[:mlen]
     msg = hash_to_N(m)
-    return gravity_verify(pk, sig, Hash(bytes_to_int_list(msg)))
+    return gravity_verify(pk, sig, Hash(bytes_to_int_list(msg))), m
