@@ -9,7 +9,8 @@ def xor(a, b):
 def gf2x_add(a, b):
     # a, b = check_type(a, b)
 
-    a, b = trim_unnecessary_zeros(a), trim_unnecessary_zeros(b)
+    a = trim_unnecessary_zeros(a)
+    b = trim_unnecessary_zeros(b)
 
     N = len(a)
     D = len(b)

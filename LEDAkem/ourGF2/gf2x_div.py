@@ -3,13 +3,13 @@ from LEDAkem.ourGF2.util_function import trim_unnecessary_zeros
 
 
 def gf2x_div(a, b):
-    a_length = len(a) - 1
-    b_length = len(b) - 1
+    a_length = np.size(a) - 1
+    b_length = np.size(b) - 1
 
     if a[a_length] == 0:
         a = trim_unnecessary_zeros(a)
 
-    if b[a_length] == 0:
+    if b[b_length] == 0:
         b = trim_unnecessary_zeros(b)
 
     if not b.any():

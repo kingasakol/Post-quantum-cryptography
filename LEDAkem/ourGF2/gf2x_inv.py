@@ -5,11 +5,11 @@ from LEDAkem.ourGF2.gf2x_div import gf2x_div
 
 
 def gf2x_inv(f, g):
-    out = gf2x_xgcd(f, g)[0]
+    out = gf2x_gcd(f, g)[0]
     return out
 
 
-def gf2x_xgcd(b, a):
+def gf2x_gcd(b, a):
     x1 = np.array([1], dtype="uint8")
     y0 = np.array([1], dtype="uint8")
 
