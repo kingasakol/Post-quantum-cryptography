@@ -18,9 +18,9 @@ def decrypt_niederreiter(c, seed_exp, i_max, seed, n0, p, dv, m, sha3):
     s = circulant_matrix_mod(L, c)
     s = circulant_transpose(s, p)
 
-    res_from_q_decodeer = Q_decoder(H, Q, n0, p, s, seed_exp, i_max)
+    res_from_q_decoder = Q_decoder(H, Q, n0, p, s, seed_exp, i_max)
 
-    return sha3(res_from_q_decodeer).digest()
+    return sha3(res_from_q_decoder[1]).digest()
 
 
 
@@ -64,13 +64,13 @@ def Q_decoder(H, Q, n0, p, s, seed_exp, i_max):
             temp = np.zeros(p, dtype='uint8')
 
             for j in range(n0):
-                temp = gf2x_add(temp, circulant_matrix_mod(e[j, :], circulant_transpose(Q[i, j])))
+                temp = gf2x_add(temp, circulant_matrix_mod(e[j, :], circulant_transpose(Q[i, j], p)))
 
             ep.append(temp)
 
         delta_s = np.zeros(p, dtype='uint8')
         for i in range(n0):
-            delta_s = gf2x_add(delta_s, circulant_matrix_mod(ep[i], circulant_transpose(H[i])))
+            delta_s = gf2x_add(delta_s, circulant_matrix_mod(ep[i], circulant_transpose(H[i], p)))
 
         s_i = gf2x_add(s, delta_s)
         i_iter += 1
