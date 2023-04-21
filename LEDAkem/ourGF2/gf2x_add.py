@@ -7,7 +7,7 @@ def xor(a, b):
 
 
 def gf2x_add(a, b):
-    # a, b = check_type(a, b)
+    a, b = check_type(a, b)
 
     a = trim_unnecessary_zeros(a)
     b = trim_unnecessary_zeros(b)
@@ -23,3 +23,26 @@ def gf2x_add(a, b):
         res = np.concatenate((xor(a, b[:N]), b[N:]))
 
     return trim_unnecessary_zeros(res)
+
+
+def check_type(a, b):
+    """Type check and force cast to uint8 ndarray
+
+    Notes
+    -----
+    Ideally for best performance one should always use uint8 or bool when using this library.
+
+    """
+
+    if isinstance(a, np.ndarray):
+        a = np.array(a, dtype="uint8")
+    if isinstance(b, np.ndarray):
+        b = np.array(b, dtype="uint8")
+
+    if a.dtype is not "uint8":
+        a = a.astype("uint8")
+
+    if b.dtype is not "uint8":
+        b = b.astype("uint8")
+
+    return a, b

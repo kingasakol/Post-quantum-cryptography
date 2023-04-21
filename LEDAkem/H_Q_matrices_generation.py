@@ -17,17 +17,19 @@ def generate_H_Q_matrices(n0, p, dv, m, seed):
 
     #it should be 2 loops [[], []...[]]
     # może dałoby się zrobić to w poprzedniej pętli
+
     for i in range(n0):
         q_list = []
+
         for j in range(n0):
             q = binary_block_generate(seed, p, m_copy[j])
             q_list.append(q)
-            seed + b'1'
+            seed += b'1'
 
         m_copy = np.roll(m_copy, 1)  #not sure if it is neccessary
         Q.append(q_list)
 
-    return np.array(H, dtype=int), np.array(Q, dtype=int)
+    return np.array(H, dtype='uint8'), np.array(Q, dtype='uint8')
 
 
 

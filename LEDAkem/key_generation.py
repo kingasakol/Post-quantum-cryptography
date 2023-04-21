@@ -9,9 +9,6 @@ import numpy as np
 def key_generation(seed, n0, p, dv, m, polynomial):
     H, Q = generate_H_Q_matrices(n0, p, dv, m, seed)
 
-    print(H.sum())
-    print(Q.sum())
-
     L = []
 
     for i in range(n0):

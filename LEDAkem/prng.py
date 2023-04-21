@@ -6,13 +6,23 @@ from LEDAkem.trng import trng
 
 
 def binary_block_generate(seed, size, col_weight):
-    arr = np.zeros(size, dtype= int) # maybe here should be dtype
+    digest = sha3_256(seed).digest() # seed must be trng
 
-    sha3_res, number, index = update_helper_params(seed, size, None, None)
+    num = int.from_bytes(digest, 'little')
 
-    while np.sum(arr) != col_weight:
-        arr[index] = 1
-        sha3_res, number, index = update_helper_params(seed + sha3_res, size, sha3_res, number)
+    pos = num % size
+
+    arr = np.zeros(size, dtype='uint8')
+
+    while np.sum(arr) != col_weight: #not most efficient
+
+        arr[pos] = not arr[pos]
+
+        digest = sha3_256(seed+digest).digest()
+
+        num = int.from_bytes(digest, 'little')
+
+        pos = num % size
 
     return arr
 
