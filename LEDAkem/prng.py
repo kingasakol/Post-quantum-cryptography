@@ -1,5 +1,5 @@
 import numpy as np
-from hashlib import sha3_256, sha256
+from hashlib import sha3_256
 
 from LEDAkem.trng import trng
 

@@ -26,23 +26,15 @@ def gf2x_add(a, b):
 
 
 def check_type(a, b):
-    """Type check and force cast to uint8 ndarray
-
-    Notes
-    -----
-    Ideally for best performance one should always use uint8 or bool when using this library.
-
-    """
-
     if isinstance(a, np.ndarray):
         a = np.array(a, dtype="uint8")
     if isinstance(b, np.ndarray):
         b = np.array(b, dtype="uint8")
 
-    if a.dtype is not "uint8":
+    if a.dtype != "uint8":
         a = a.astype("uint8")
 
-    if b.dtype is not "uint8":
+    if b.dtype != "uint8":
         b = b.astype("uint8")
 
     return a, b

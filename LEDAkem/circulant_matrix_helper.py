@@ -4,7 +4,7 @@ from LEDAkem.ourGF2.gf2x_div import gf2x_div
 from LEDAkem.ourGF2.util_function import trim_unnecessary_zeros, padding, transform_to_the_same_dim
 
 
-def circulant_matrix_mod(a, b):
+def circulant_matrix_mod(a, b, pol):
     a, b = trim_unnecessary_zeros(a), trim_unnecessary_zeros(b)
 
     fsize = len(a) + len(b) + 1
@@ -20,7 +20,7 @@ def circulant_matrix_mod(a, b):
 
     k = np.mod(np.rint(np.real(res)).astype("uint64"), 2)
 
-    out = gf2x_div(k, np.array([1] + (15013 - 1) * [0] + [1], dtype="uint8"))[1]
+    out = gf2x_div(k, pol)[1]
 
     # these operations are equal to do #np.mod(np.rint(np.real(np.fft.ifft(np.fft.fft(a) * np.fft.fft(b)))),2).astype("uint8")
 

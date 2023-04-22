@@ -8,7 +8,7 @@ from LEDAkem.trng import trng
 from hashlib import sha3_256
 
 
-def encrypt_niederreiter(M, n0, p, t, sha3, TRNG_byte_len):
+def encrypt_niederreiter(M, n0, p, t, sha3, TRNG_byte_len, polynomial):
 
     seed = trng(TRNG_byte_len)
     e = binary_block_generate(seed, n0 * p, t)
@@ -20,7 +20,7 @@ def encrypt_niederreiter(M, n0, p, t, sha3, TRNG_byte_len):
     helper_arr = np.zeros(p, dtype='uint8')
 
     for i in range(n0 - 1):
-        helper_arr = gf2x_add(helper_arr, circulant_matrix_mod(circulant_transpose(e[i,:], p), M[i]))
+        helper_arr = gf2x_add(helper_arr, circulant_matrix_mod(circulant_transpose(e[i,:], p), M[i], polynomial))
 
     c = gf2x_add(helper_arr, circulant_transpose(e[-1, :], p))
 

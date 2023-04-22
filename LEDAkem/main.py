@@ -1,29 +1,33 @@
-from hashlib import sha3_256
-
-import numpy as np
-
 from LEDAkem.key_generation import key_generation
 from LEDAkem.niederreiter_decrypt import decrypt_niederreiter
 from LEDAkem.niederreiter_encrypt import encrypt_niederreiter
 from LEDAkem.seed_expander import seed_expander
+from LEDAkem.input_parameters import parameters
 from LEDAkem.trng import trng
 
 if __name__ == "__main__":
-    # n0 =
-    # p =
-    # t =
-    # sha3 = sha3_256
-    # TRNG_byte_len
 
-    pol = np.array([1] + (15013 - 1) * [0] + [1], dtype="uint8")
-    pseed = trng(24)
+    n0 = 4
+    category = 2
+    i_max = 20
 
-    M = key_generation(pseed, 2, 15013, 9, np.array([5, 4]), pol) #dziala
+    parameters = parameters(category, n0)
+    pol = parameters[0]
+    p = parameters[1]
+    t = parameters[2]
+    m = parameters[3]
+    dv = parameters[4]
+    byte_len = parameters[5]
+    version_of_sha3 = parameters[6]
 
-    s, c = encrypt_niederreiter(M, 2, 15013, 143, sha3_256, 24) # działa, ale bianry_block_generation do poprawy
-    threshold = seed_expander(None, None)
+    pseed = trng(byte_len)
 
-    res = decrypt_niederreiter(c, threshold, 20, pseed, 2, 15013, 9, np.array([5, 4]), sha3_256)
+    M = key_generation(pseed, n0, p, dv, m, pol)
+
+    s, c = encrypt_niederreiter(M, n0, p, t, version_of_sha3, byte_len, pol)
+    threshold = seed_expander(category, n0)
+
+    res = decrypt_niederreiter(c, threshold, i_max, pseed, n0, p, dv, m, version_of_sha3, pol)
 
     print(res.hex())
     print(s.hex())

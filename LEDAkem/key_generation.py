@@ -14,7 +14,7 @@ def key_generation(seed, n0, p, dv, m, polynomial):
     for i in range(n0):
         l = np.zeros(p, dtype=int)
         for j in range(n0):
-            l = gf2x_add(l, circulant_matrix_mod(H[j], Q[j, i]))
+            l = gf2x_add(l, circulant_matrix_mod(H[j], Q[j, i], polynomial))
         L.append(l)
 
     L_inv = gf2x_inv(L[-1], polynomial)  # LEDAkem_GLOBAL_PARAMS.irr_poly
@@ -22,7 +22,7 @@ def key_generation(seed, n0, p, dv, m, polynomial):
     M = []
 
     for i in range(n0 - 1):
-        m = circulant_matrix_mod(L_inv, L[i])  # może być do poprawy
+        m = circulant_matrix_mod(L_inv, L[i], polynomial)  # może być do poprawy
         M.append(m)
 
     return M

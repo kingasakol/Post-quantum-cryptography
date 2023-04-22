@@ -6,19 +6,19 @@ from LEDAkem.ourGF2.gf2x_add import gf2x_add
 from LEDAkem.ourGF2.util_function import padding
 
 
-def decrypt_niederreiter(c, seed_exp, i_max, seed, n0, p, dv, m, sha3):
+def decrypt_niederreiter(c, seed_exp, i_max, seed, n0, p, dv, m, sha3, polynomial):
     H, Q = generate_H_Q_matrices(n0, p, dv, m, seed)
 
     L = np.zeros(p, dtype='uint8')
 
     for i in range(n0):
-        circmp = circulant_matrix_mod(H[i], Q[i][n0 - 1])
+        circmp = circulant_matrix_mod(H[i], Q[i][n0 - 1], polynomial)
         L = gf2x_add(L, circmp)
 
-    s = circulant_matrix_mod(L, c)
+    s = circulant_matrix_mod(L, c, polynomial)
     s = circulant_transpose(s, p)
 
-    res_from_q_decoder = Q_decoder(H, Q, n0, p, s, seed_exp, i_max)
+    res_from_q_decoder = Q_decoder(H, Q, n0, p, s, seed_exp, i_max, polynomial)
 
     return sha3(res_from_q_decoder[1]).digest()
 
@@ -27,7 +27,7 @@ def decrypt_niederreiter(c, seed_exp, i_max, seed, n0, p, dv, m, sha3):
 
 # #todo read specification !!!
 
-def Q_decoder(H, Q, n0, p, s, seed_exp, i_max):
+def Q_decoder(H, Q, n0, p, s, seed_exp, i_max, polynomial):
     i_iter = 1
 
     e = np.zeros(n0 * p, dtype='uint8')
@@ -65,13 +65,13 @@ def Q_decoder(H, Q, n0, p, s, seed_exp, i_max):
             temp = np.zeros(p, dtype='uint8')
 
             for j in range(n0):
-                temp = gf2x_add(temp, circulant_matrix_mod(e[j, :], circulant_transpose(Q[i, j], p)))
+                temp = gf2x_add(temp, circulant_matrix_mod(e[j, :], circulant_transpose(Q[i, j], p), polynomial))
 
             ep.append(temp)
 
         delta_s = np.zeros(p, dtype='uint8')
         for i in range(n0):
-            delta_s = gf2x_add(delta_s, circulant_matrix_mod(ep[i], circulant_transpose(H[i], p)))
+            delta_s = gf2x_add(delta_s, circulant_matrix_mod(ep[i], circulant_transpose(H[i], p), polynomial))
 
         s_i = gf2x_add(s, delta_s)
         i_iter += 1
