@@ -39,12 +39,6 @@ def hashcpy(a: Hash, b: Hash):
     a.h = b.h.copy()
 
 
-def hashcpyN(a: [Hash], b: [Hash], N: int):
-    print("WARINING different than src")
-    for i in range(N):
-        a[i] = b[i]
-
-
 def hashzero(a):
     a.h = [0 for _ in range(16)]
 
@@ -76,7 +70,7 @@ def hash_to_N(src: bytes) -> bytes:
 
 def hash_compress_pairs(buf: [Hash], dst_id: int, src_id: int, count: int):
     for i in range(count):
-        buf[dst_id + i] = hash_2N_to_N(buf[src_id + i * 2], buf[ src_id + i * 2 + 1])
+        buf[dst_id + i] = hash_2N_to_N(buf[src_id + i * 2], buf[src_id + i * 2 + 1])
 
 
 def hash_compress_all(src):
