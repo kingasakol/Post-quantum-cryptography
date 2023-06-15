@@ -6,7 +6,6 @@ from LEDAkem.input_parameters import parameters
 from LEDAkem.trng import trng
 
 if __name__ == "__main__":
-
     n0 = 4
     category = 2
     i_max = 20

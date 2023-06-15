@@ -22,7 +22,7 @@ def key_generation(seed, n0, p, dv, m, polynomial):
     M = []
 
     for i in range(n0 - 1):
-        m = circulant_matrix_mod(L_inv, L[i], polynomial)  # może być do poprawy
+        m = circulant_matrix_mod(L_inv, L[i], polynomial)
         M.append(m)
 
     return M

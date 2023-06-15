@@ -1,5 +1,4 @@
 import numpy as np
-
 from LEDAkem.circulant_matrix_helper import circulant_matrix_mod, circulant_transpose
 from LEDAkem.key_generation import key_generation
 from LEDAkem.ourGF2.gf2x_add import gf2x_add
@@ -9,16 +8,11 @@ from hashlib import sha3_256
 
 
 def encrypt_niederreiter(M, n0, p, t, sha3, TRNG_byte_len, polynomial):
-
     seed = trng(TRNG_byte_len)
     e = binary_block_generate(seed, n0 * p, t)
-
     e = np.reshape(e, (n0, p))
-
     s = sha3(e).digest()
-
     helper_arr = np.zeros(p, dtype='uint8')
-
     for i in range(n0 - 1):
         helper_arr = gf2x_add(helper_arr, circulant_matrix_mod(circulant_transpose(e[i,:], p), M[i], polynomial))
 

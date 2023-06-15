@@ -6,7 +6,6 @@ from LEDAkem.trng import trng
 
 def generate_H_Q_matrices(n0, p, dv, m, seed):
     m_copy = np.copy(m)
-
     H = []
     Q = []
 
@@ -14,9 +13,6 @@ def generate_H_Q_matrices(n0, p, dv, m, seed):
         h = binary_block_generate(seed, p, dv)
         H.append(h)
         seed += b'1'
-
-    #it should be 2 loops [[], []...[]]
-    # może dałoby się zrobić to w poprzedniej pętli
 
     for i in range(n0):
         q_list = []

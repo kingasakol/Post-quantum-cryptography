@@ -1,7 +1,6 @@
 import numpy as np
 from LEDAkem.ourGF2.util_function import trim_unnecessary_zeros
 
-
 def gf2x_div(a, b):
     a_length = np.size(a) - 1
     b_length = np.size(b) - 1

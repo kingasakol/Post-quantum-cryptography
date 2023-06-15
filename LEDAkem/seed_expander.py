@@ -1,10 +1,6 @@
 import numpy as np
 
-#todo
-#check it in official ledakem code
-
 def seed_expander(category, n0):
-
     if category == 1 and n0 == 2:
         return np.array(((0, 43),
                                    (2843, 44),
@@ -98,7 +94,6 @@ def seed_expander(category, n0):
                                (9386, 95),
                                (9593, 96),
                                (9780, 97)), dtype=np.int64)
-
 
 
 if __name__ == "__main__":
